@@ -3,34 +3,42 @@ import { View, Text, StyleSheet, Dimensions, Pressable } from 'react-native';
 import Topbar from '@/components/common/Topbar';
 import Month from '@/components/personal/month';
 import Week from '@/components/personal/week';
+import WeekEdit from '@/components/personal/weekEdit';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function CalendarPager() {
   const [calendarWidth, setCalendarWidth] = useState(screenWidth);
-  const [calendarTypeBtn, setCalendarTypeBtn] = useState('월');
+  const [calendarTypeBtn, setCalendarTypeBtn] = useState('편집');
   return (
     <View
       style={{ flex: 1 }}
     >
       <Topbar></Topbar>
       {
-        calendarTypeBtn === '월' ? <Month></Month> : <Week></Week>
+        calendarTypeBtn === '월' ? <Month />
+          : calendarTypeBtn === '주' ? <Week />
+            : <WeekEdit />
+      }
+      {
+        calendarTypeBtn === "편집" ?
+          null
+          :
+          <Pressable
+            style={({ pressed }) => [
+              styles.calendarTypeBtn,
+              pressed && { opacity: 0.7 }
+            ]}
+            onPress={() =>
+              setCalendarTypeBtn(prev => (prev === '월' ? '주' : '월'))
+            }
+          >
+            <Text style={styles.calendarTypeText}>
+              {calendarTypeBtn}
+            </Text>
+          </Pressable>
       }
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.calendarTypeBtn,
-          pressed && { opacity: 0.7 }
-        ]}
-        onPress={() =>
-          setCalendarTypeBtn(prev => (prev === '월' ? '주' : '월'))
-        }
-      >
-        <Text style={styles.calendarTypeText}>
-          {calendarTypeBtn}
-        </Text>
-      </Pressable>
     </View>
   );
 }

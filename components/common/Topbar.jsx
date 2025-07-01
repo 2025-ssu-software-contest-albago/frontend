@@ -14,8 +14,6 @@ import { Ionicons, Feather } from '@expo/vector-icons';
 //zustand 전역변수 관리 
 import { useUserStore } from '@/scripts/store/userStore';
 
-
-
 export default function TopBar() {
     const [modalVisible, setModalVisible] = useState(false);
     const router = useRouter(); // 추가
@@ -25,7 +23,7 @@ export default function TopBar() {
     return (
         <View style={styles.container}>
             {/* 왼쪽 영역 */}
-            <View style={styles.leftSection}>
+            <TouchableOpacity style={styles.leftSection} onPress={() => setModalVisible(true)}>
                 {user?.spaces[0]?.imageUrl === "null" ? (
                     <View style={styles.avatar}>
                         <Text style={styles.avatarText}>{user?.name?.charAt(0)}</Text>
@@ -34,13 +32,13 @@ export default function TopBar() {
                     <Image source={{ uri: user?.imageUrl }} style={styles.avatar} />
                 )}
                 <View style={styles.userInfo}>
-                    <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.nameRow}>
+                    <View style={styles.nameRow}>
                         <Text style={styles.name}>{user?.spaces[0]?.name}</Text>
                         <Ionicons name="chevron-down" size={16} color="#333" />
-                    </TouchableOpacity>
+                    </View>
                     <Text style={styles.email}>{user?.email}</Text>
                 </View>
-            </View>
+            </TouchableOpacity>
 
             {/* 오른쪽 아이콘 */}
             <View style={styles.rightSection}>

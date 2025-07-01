@@ -32,8 +32,8 @@ export default function PersonalWeek() {
       if (weekDateStrs.includes(dateStr)) {
         const start = localStart.getHours() + localStart.getMinutes() / 60;
         const end = localEnd.getHours() + localEnd.getMinutes() / 60;
-        startHour = Math.min(startHour, Math.floor(start));
-        endHour = Math.max(endHour, Math.ceil(end + 3));
+        startHour = Math.min(startHour, Math.floor(start - 1));
+        endHour = Math.max(endHour, Math.ceil(end + 1));
       }
     });
 
@@ -111,8 +111,8 @@ export default function PersonalWeek() {
 
                     //문제없음
 
-                    const top = (startTotal - startHour + 1) * hourBlockHeight;
-                    const height = (endTotal - startTotal + 1) * hourBlockHeight;
+                    const top = (startTotal - startHour) * hourBlockHeight;
+                    const height = (endTotal - startTotal) * hourBlockHeight;
 
                     return (
                       <View
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderColor: '#ddd',
-    paddingBottom: 4,
+    paddingBottom: 10,
   },
   weekdayCell: {
     flex: 1,
@@ -186,10 +186,8 @@ const styles = StyleSheet.create({
   },
   timeLabelColumn: {
     width: 40,
-    marginTop: 20,
   },
   timeLabelRow: {
-    justifyContent: 'center',
     alignItems: 'center',
   },
   timeText: {

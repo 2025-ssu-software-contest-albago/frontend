@@ -192,6 +192,9 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         marginTop: 2,
         width: '100%',
+        aspectRatio : "2.5/1",
+        alignItems: "center",
+        justifyContent: "center",
     },
     scheduleText: {
         fontSize: 10,
@@ -202,12 +205,12 @@ const styles = StyleSheet.create({
         fontSize: 10,
         color: '#555',
         marginTop: 2,
-    }, 
+    },
     scheduleTitleText: {
         fontSize: 11,
-        color: '#fff',
+        color: 'white',
         fontWeight: 'bold',
-        padding: 1,
+        textAlign: "center",
     },
 
     scheduleTimeText: {
