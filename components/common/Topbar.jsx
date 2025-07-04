@@ -10,26 +10,35 @@ import {
 import Modal from 'react-native-modal';
 import { Image } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-//zustand 전역변수 관리 
+// Zustand 전역변수 관리
 import { useUserStore } from '@/scripts/store/userStore';
 
 export default function TopBar() {
     const [modalVisible, setModalVisible] = useState(false);
-    const router = useRouter(); // 추가
+    const router = useRouter();
 
-    // ✅ Zustand에서 유저 정보 사용
+    const insets = useSafeAreaInsets();
+
     const user = useUserStore((state) => state.user);
+    const selectedSpaceId = useUserStore((state) => state.selected_space);
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
             {/* 왼쪽 영역 */}
-            <TouchableOpacity style={styles.leftSection} onPress={() => setModalVisible(true)}>
-                {user?.spaces[0]?.imageUrl === "null" ? (
+            <TouchableOpacity
+                style={styles.leftSection}
+                onPress={() => {
+                    setModalVisible(true);
+                }}
+            >
+                {user?.spaces?.[0]?.imageUrl === null ? (
                     <View style={styles.avatar}>
                         <Text style={styles.avatarText}>{user?.name?.charAt(0)}</Text>
                     </View>
                 ) : (
-                    <Image source={{ uri: user?.imageUrl }} style={styles.avatar} />
+                    <Image source={{ uri: user?.spaces?.[0]?.imageUrl }} style={styles.avatar} />
                 )}
                 <View style={styles.userInfo}>
                     <View style={styles.nameRow}>
@@ -57,12 +66,39 @@ export default function TopBar() {
                 animationIn="slideInUp"
                 animationOut="slideOutDown"
                 backdropOpacity={0.4}
-                style={styles.modalContainer}>
+                style={{ margin: 0, justifyContent: 'flex-end' }}
+                useNativeDriver={false}
+                hardwareAccelerated={false}
+            >
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>공간 전환</Text>
-                    <Pressable><Text style={styles.modalItem}>팀 공간 1</Text></Pressable>
-                    <Pressable><Text style={styles.modalItem}>팀 공간 2</Text></Pressable>
-                    <Pressable><Text style={styles.modalItem}>+ 새 공간 만들기</Text></Pressable>
+                    <Text style={styles.modalHeaderTitle}>공간 변경</Text>
+                    <Text style={styles.userEmail}>{user?.email}</Text>
+
+                    <View style={styles.spaceList}>
+                        {user?.spaces?.map((space, i) => (
+                            <Pressable
+                                key={space.id}
+                                style={styles.spaceItem}
+                                onPress={() => {}}
+                            >
+                                {space.imageUrl === null || !space.imageUrl ? (
+                                    <View style={styles.avatar}>
+                                        <Text style={styles.avatarText}>{space.name.charAt(0)}</Text>
+                                    </View>
+                                ) : (
+                                    <Image source={{ uri: space.imageUrl }} style={styles.avatar} />
+                                )}
+                                <Text style={styles.spaceName}>{space.name}</Text>
+                                {selectedSpaceId === i && (
+                                    <Text style={styles.checkmark}>✓</Text>
+                                )}
+                            </Pressable>
+                        ))}
+                    </View>
+
+                    <Pressable style={styles.addSpaceButton} onPress={() => { /* Navigate to add new space screen */ }}>
+                        <Text style={styles.addSpaceButtonText}>새로운 공간 추가하기</Text>
+                    </Pressable>
                 </View>
             </Modal>
         </View>
@@ -74,9 +110,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 16,
-        marginTop: 20
-        // backgroundColor: 'white',
+        paddingHorizontal: 16,
+        backgroundColor: 'white',
     },
     leftSection: {
         flexDirection: 'row',
@@ -118,28 +153,82 @@ const styles = StyleSheet.create({
     icon: {
         marginRight: 12,
     },
-    modalContainer: {
-        justifyContent: 'flex-end', // ✅ 아래서부터 올라오게
-        margin: 0, // ✅ 기본 margin 제거 (화면 끝까지)
-    },
-    modalOverlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.3)',
-    },
     modalContent: {
         backgroundColor: 'white',
-        padding: 24,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
+        borderTopRightRadius: 10,
+        borderTopLeftRadius: 10,
+        paddingHorizontal: 20,
+        paddingBottom: 50,
+        paddingTop: 10,
+        width: '100%', 
+        alignSelf: 'center',
+        // Shadow for iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        // Elevation for Android
+        elevation: 5,
     },
-    modalTitle: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        marginBottom: 12,
-    },
-    modalItem: {
-        paddingVertical: 8,
+    modalHeaderTitle: {
         fontSize: 14,
+        fontWeight: 'bold',
+        color: '#333',
+        textAlign: 'center',
+        marginBottom: 4,
+    },
+    userEmail: {
+        fontSize: 14,
+        color: '#888',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    spaceList: {
+        // No specific styling needed here, items will stack
+    },
+    spaceItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    avatar: {
+        width: 30,
+        height: 30,
+        borderRadius: 4,
+        backgroundColor: '#f0f0f0', // Light grey background for initial letter
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
+        overflow: 'hidden', // Ensure image respects border radius
+    },
+    avatarText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#555',
+    },
+    spaceName: {
+        flex: 1, // Take up remaining space
+        fontSize: 16,
+        color: '#333',
+    },
+    checkmark: {
+        fontSize: 20,
+        color: '#007AFF', // Standard iOS blue for checkmark
+        marginLeft: 10,
+    },
+    addSpaceButton: {
+        backgroundColor: '#007AFF', // Blue button color
+        borderRadius: 8,
+        paddingVertical: 14,
+        marginTop: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    addSpaceButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });

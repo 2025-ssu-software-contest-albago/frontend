@@ -1,7 +1,8 @@
+// WeekEdit.tsx (주별로 셀 상태 관리 및 일정 저장 - 디버깅 코드 제거, 방어 코드 적용)
 import React, { useState, useRef, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Pressable, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, StyleSheet, InteractionManager } from 'react-native';
 import { useUserStore } from '@/scripts/store/userStore';
-import { useCalTypeStore } from '@/scripts/store/personalStore';
+import { useCalTypeStore, useEditDateStore } from '@/scripts/store/personalStore';
 
 import PagerView from 'react-native-pager-view';
 import Modal from 'react-native-modal';
@@ -11,13 +12,23 @@ import WeekPage from '@/components/personal/weekPage';
 
 export default function WeekEdit() {
     const pagerRef = useRef(null);
-    const [baseDate, setBaseDate] = useState(dayjs().startOf('week'));
+    const { date: initialEditDate } = useEditDateStore();
+    const [baseDate, setBaseDate] = useState(
+        initialEditDate ? dayjs(initialEditDate).startOf('week') : dayjs().startOf('week')
+    );
+
+    const [currentOffset, setCurrentOffset] = useState(0);
     const [spaceModalVisible, setSpaceModalVisible] = useState(false);
-    const [selectedSpace, setSelectedSpace] = useState('스쿨피자');
+    const [selectedSpace, setSelectedSpace] = useState('롯데리아');
+    const [scrollEnabled, setScrollEnabled] = useState(true);
+    const [selectedCellsMap, setSelectedCellsMap] = useState<{
+        [weekStart: string]: Record<number, number[]>;
+    }>({});
 
     const user = useUserStore((state) => state.user);
     const selectedSpaceIndex = useUserStore((state) => state.selected_space);
-    const spaces = user?.spaces[selectedSpaceIndex].workPlaces
+    const setUser = useUserStore((state) => state.setUser);
+    const spaces = user?.spaces[selectedSpaceIndex].workPlaces;
 
     const calendarTypeBtn = useCalTypeStore((state) => state.type);
     const setCalType = useCalTypeStore((state) => state.setCalType);
@@ -27,68 +38,141 @@ export default function WeekEdit() {
     const handlePageSelected = (e) => {
         const newPage = e.nativeEvent.position;
         const offset = newPage - 1;
+
         if (offset !== 0) {
+            setScrollEnabled(false);
             const newBase = baseDate.add(offset * 7, 'day');
             setTimeout(() => {
                 setBaseDate(newBase);
+                setCurrentOffset(0);
                 pagerRef.current?.setPageWithoutAnimation(1);
+                InteractionManager.runAfterInteractions(() => {
+                    setScrollEnabled(true);
+                });
             }, 0);
         }
     };
 
+    const handleSave = () => {
+        const weekKey = baseDate.startOf('week').format('YYYY-MM-DD');
+        const cells = selectedCellsMap[weekKey];
+        if (!user || !user.spaces || !user.spaces[selectedSpaceIndex] || !cells) return;
+
+        const currentSpace = user.spaces[selectedSpaceIndex];
+        const updatedSchedules = [];
+
+        for (const col in cells) {
+            const colIdx = parseInt(col);
+            if (!cells[colIdx] || cells[colIdx].length === 0) continue;
+
+            const rows = [...cells[colIdx]].sort((a, b) => a - b);
+            let startIdx = null;
+
+            for (let i = 0; i <= rows.length; i++) {
+                if (startIdx === null) startIdx = rows[i];
+
+                if (i === rows.length || rows[i] + 1 !== rows[i + 1]) {
+                    const rowStart = startIdx;
+                    const rowEnd = rows[i];
+                    const startHour = hours[rowStart];
+                    const endHour = hours[rowEnd] + 0.5;
+
+                    if (!Number.isFinite(startHour) || !Number.isFinite(endHour)) {
+                        startIdx = null;
+                        continue;
+                    }
+
+                    const date = baseDate.startOf('week').add(colIdx, 'day');
+                    const startTime = date.add(startHour, 'hour').toISOString();
+                    const endTime = date.add(endHour, 'hour').toISOString();
+
+                    const workPlace = currentSpace.workPlaces.find(wp => wp.name === selectedSpace);
+
+                    updatedSchedules.push({
+                        id: `schedule_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                        name: selectedSpace,
+                        workPlaceId: workPlace?.id || null,
+                        startTime,
+                        endTime,
+                        memo: '',
+                        color: workPlace?.color || '#CCCCCC',
+                        hourlyWage: workPlace?.hourlyWage || null,
+                    });
+
+                    startIdx = null;
+                }
+            }
+        }
+        //유저 정보에 넣는 부분, 로컬에서 반영 된 것 처럼 보이게 해줌 
+        const newUser = { ...user };
+        newUser.spaces[selectedSpaceIndex].schedules = [
+            ...newUser.spaces[selectedSpaceIndex].schedules,
+            ...updatedSchedules
+        ];
+        setUser(newUser);
+
+
+        console.log('✅ 저장 완료:', updatedSchedules);
+        setCalType('월')
+    };
+
+
     return (
         <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, backgroundColor: "white" }}>
-                {
-                    calendarTypeBtn === '편집' &&
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, backgroundColor: 'white' }}>
+                {calendarTypeBtn === '편집' && (
                     <Pressable onPress={() => setCalType('월')}>
                         <Text style={styles.closeIcon}>×</Text>
                     </Pressable>
-                }
+                )}
             </View>
+
             <PagerView
                 ref={pagerRef}
                 initialPage={1}
                 onPageSelected={handlePageSelected}
+                scrollEnabled={scrollEnabled}
                 style={{ flex: 1 }}
             >
-                <WeekPage
-                    key="-1"
-                    offset={-1}
-                    baseDate={baseDate}
-                    selectedSpace={selectedSpace}
-                    setSpaceModalVisible={setSpaceModalVisible}
-                    hours={hours}
-                />
-                <WeekPage
-                    key="0"
-                    offset={0}
-                    baseDate={baseDate}
-                    selectedSpace={selectedSpace}
-                    setSpaceModalVisible={setSpaceModalVisible}
-                    hours={hours}
-                />
-                <WeekPage
-                    key="1"
-                    offset={1}
-                    baseDate={baseDate}
-                    selectedSpace={selectedSpace}
-                    setSpaceModalVisible={setSpaceModalVisible}
-                    hours={hours}
-                />
+                {[-1, 0, 1].map((offset) => {
+                    const targetDate = baseDate.add(offset * 7, 'day');
+                    const weekKey = targetDate.startOf('week').format('YYYY-MM-DD');
+                    return (
+                        <WeekPage
+                            key={offset}
+                            offset={offset}
+                            baseDate={baseDate}
+                            selectedSpace={selectedSpace}
+                            setSpaceModalVisible={setSpaceModalVisible}
+                            hours={hours}
+                            displayDate={targetDate}
+                            selectedCells={selectedCellsMap[weekKey] || {}}
+                            onCellToggle={(col, row) => {
+                                setSelectedCellsMap((prev) => {
+                                    const prevCells = prev[weekKey] || {};
+                                    const colSelection = prevCells[col] || [];
+                                    const updated = colSelection.includes(row)
+                                        ? colSelection.filter((r) => r !== row)
+                                        : [...colSelection, row];
+                                    return {
+                                        ...prev,
+                                        [weekKey]: { ...prevCells, [col]: updated },
+                                    };
+                                });
+                            }}
+                        />
+                    );
+                })}
             </PagerView>
 
-            <TouchableOpacity
-                style={styles.dropdown}
-                onPress={() => setSpaceModalVisible(true)}
-            >
+            <TouchableOpacity style={styles.dropdown} onPress={() => setSpaceModalVisible(true)}>
                 <View style={styles.dropdownContent}>
                     <Text style={styles.dropdownText}>{selectedSpace}</Text>
                     <Ionicons name="chevron-down" size={18} color="#555" />
                 </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.saveButton}>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                 <Text style={styles.saveText}>저장 하기</Text>
             </TouchableOpacity>
 
@@ -100,18 +184,32 @@ export default function WeekEdit() {
                 backdropOpacity={0.4}
                 style={{ margin: 0, justifyContent: 'flex-end' }}
             >
-                <View style={{ backgroundColor: 'white', padding: 20, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+                <View style={{ backgroundColor: 'white', padding: 20, paddingBottom: 100, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+                    <View style={{ alignItems: 'center', marginBottom: 16 }}>
+                        <Text style={{ fontSize: 16 }}>수정할 근무지</Text>
+                    </View>
+
                     {spaces.map((space, i) => (
-                        <TouchableOpacity
-                            key={i}
-                            onPress={() => {
-                                setSelectedSpace(space.name);
-                                setSpaceModalVisible(false);
-                            }}
-                            style={{ paddingVertical: 10 }}
-                        >
-                            <Text>{space.name}</Text>
-                        </TouchableOpacity>
+                        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', overflow: 'hidden', marginBottom: 8 }}>
+                            <View style={{
+                                width: 6,
+                                height: '100%',
+                                backgroundColor: space.color,
+                                borderTopLeftRadius: 4,
+                                borderBottomLeftRadius: 4,
+                                borderTopRightRadius: 4,
+                                borderBottomRightRadius: 4,
+                            }} />
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setSelectedSpace(space.name);
+                                    setSpaceModalVisible(false);
+                                }}
+                                style={{ flex: 1, paddingVertical: 10, paddingHorizontal: 12 }}
+                            >
+                                <Text>{space.name}</Text>
+                            </TouchableOpacity>
+                        </View>
                     ))}
                 </View>
             </Modal>
@@ -150,4 +248,3 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
 });
-

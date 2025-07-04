@@ -1,7 +1,16 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
+// 수정된 PersonalWeek.tsx (스와이프 중 렌더링 보장 후 다음 스와이프 허용)
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  Platform,
+  InteractionManager,
+} from 'react-native';
 import PagerView from 'react-native-pager-view';
-import { addWeeks, startOfWeek, format, addDays } from 'date-fns';
+import { addWeeks, startOfWeek, format, addDays, parseISO } from 'date-fns';
 import { useUserStore } from '@/scripts/store/userStore';
 
 const { height } = Dimensions.get('window');
@@ -10,6 +19,7 @@ const WEEK_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 export default function PersonalWeek() {
   const pagerRef = useRef(null);
   const [baseDate, setBaseDate] = useState(new Date());
+  const [scrollEnabled, setScrollEnabled] = useState(true);
   const user = useUserStore((state) => state.user);
   const selected_space = useUserStore((state) => state.selected_space);
 
@@ -26,8 +36,8 @@ export default function PersonalWeek() {
     const weekDateStrs = weekDates.map((d) => format(d, 'yyyy-MM-dd'));
 
     schedules.forEach((s) => {
-      const localStart = new Date(s.startTime);
-      const localEnd = new Date(s.endTime);
+      const localStart = parseISO(s.startTime);
+      const localEnd = parseISO(s.endTime);
       const dateStr = format(localStart, 'yyyy-MM-dd');
       if (weekDateStrs.includes(dateStr)) {
         const start = localStart.getHours() + localStart.getMinutes() / 60;
@@ -50,7 +60,7 @@ export default function PersonalWeek() {
     const schedules = user?.spaces?.[selected_space]?.schedules || [];
 
     const scheduleMap = schedules.reduce((acc, s) => {
-      const localStart = new Date(s.startTime);
+      const localStart = parseISO(s.startTime);
       const dateKey = format(localStart, 'yyyy-MM-dd');
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(s);
@@ -64,13 +74,10 @@ export default function PersonalWeek() {
 
     return (
       <View key={offset} style={styles.weekContainer}>
-
-        {/* 날짜 */}
         <Text style={styles.dateRangeText}>
           {format(weekDates[0], 'M월 d일')} - {format(weekDates[6], 'M월 d일')}
         </Text>
 
-        {/* 요일 */}
         <View style={styles.weekdayRow}>
           <View style={styles.timeLabelColumn} />
           {WEEK_DAYS.map((day, idx) => (
@@ -80,11 +87,8 @@ export default function PersonalWeek() {
           ))}
         </View>
 
-        {/* 각 세로칸 */}
         <ScrollView style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', height: totalHeight }}>
-
-            {/* 왼쪽 타임스탬프 */}
             <View style={styles.timeLabelColumn}>
               {timeSlots.map((t, i) =>
                 Number.isInteger(t) ? (
@@ -95,22 +99,16 @@ export default function PersonalWeek() {
               )}
             </View>
 
-            {/* 각 시간표 */}
             {weekDates.map((date, idx) => {
               const dateKey = format(date, 'yyyy-MM-dd');
               const daySchedules = scheduleMap[dateKey] || [];
               return (
                 <View key={idx} style={styles.dayColumn}>
                   {daySchedules.map((s, i) => {
-                    const start = new Date(s.startTime);
-                    const end = new Date(s.endTime);
-                    //여기까진 문제없고
-
+                    const start = parseISO(s.startTime);
+                    const end = parseISO(s.endTime);
                     const startTotal = start.getHours() + start.getMinutes() / 60;
                     const endTotal = end.getHours() + end.getMinutes() / 60;
-
-                    //문제없음
-
                     const top = (startTotal - startHour) * hourBlockHeight;
                     const height = (endTotal - startTotal) * hourBlockHeight;
 
@@ -126,7 +124,7 @@ export default function PersonalWeek() {
                           },
                         ]}
                       >
-                        <Text style={styles.scheduleText}>{s.title}</Text>
+                        <Text style={styles.scheduleText}>{s.name}</Text>
                       </View>
                     );
                   })}
@@ -139,23 +137,35 @@ export default function PersonalWeek() {
     );
   };
 
+  const handlePageSelected = (e) => {
+    const newPage = e.nativeEvent.position;
+    const offset = newPage - 1;
+    if (offset !== 0) {
+      setScrollEnabled(false);
+      const newBase = addWeeks(baseDate, offset);
+      setTimeout(() => {
+        setBaseDate(newBase);
+        pagerRef.current?.setPageWithoutAnimation(1);
+        InteractionManager.runAfterInteractions(() => {
+          setScrollEnabled(true);
+        });
+      }, 0);
+    }
+  };
+
   return (
     <PagerView
       ref={pagerRef}
       initialPage={1}
-      onPageSelected={(e) => {
-        const newPage = e.nativeEvent.position;
-        setBaseDate((prev) => addWeeks(prev, newPage - 1));
-        if (pagerRef.current) {
-          pagerRef.current.setPageWithoutAnimation(1);
-        }
-      }}
+      onPageSelected={handlePageSelected}
+      scrollEnabled={scrollEnabled}
       style={{ flex: 1 }}
     >
       {[-1, 0, 1].map((offset) => renderWeek(offset))}
     </PagerView>
   );
 }
+
 
 const styles = StyleSheet.create({
   weekContainer: {
@@ -214,3 +224,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+

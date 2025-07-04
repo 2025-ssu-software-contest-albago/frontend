@@ -7,12 +7,13 @@ export const userData = {
       id: "personalSpace_id1",
       type: "personal",
       name: "천재민의 개인공간",
-      imageUrl: "null",
+      imageUrl: null,
       lastUpdatedAt: "2025-07-01T09:02:11Z",
       workPlaces: [
         {
+          id: "wp_lotteria",
           name: "롯데리아",
-          color: "#FF5733",
+          color: "#FF0000E6",
           hourlyWage: 9860,
           weeklyAllowance: true,
           nightAllowance: true,
@@ -24,6 +25,7 @@ export const userData = {
           deductions: "4대 보험"
         },
         {
+          id: "wp_momstouch",
           name: "맘스터치",
           color: "#33A1FF",
           hourlyWage: 10000,
@@ -37,6 +39,7 @@ export const userData = {
           deductions: "4대 보험"
         },
         {
+          id: "wp_burgerking",
           name: "버거킹",
           color: "#E67E22",
           hourlyWage: 11000,
@@ -50,6 +53,7 @@ export const userData = {
           deductions: "4대 보험"
         },
         {
+          id: "wp_schoolpizza",
           name: "스쿨피자",
           color: "#28B463",
           hourlyWage: 9500,
@@ -66,54 +70,60 @@ export const userData = {
       schedules: [
         {
           id: "schedule_id1",
-          title: "롯데리아",
-          startTime: "2025-07-01T10:00:00Z",
-          endTime: "2025-07-01T11:00:00Z",
+          name: "롯데리아",
+          workPlaceId: "wp_lotteria",
+          startTime: "2025-07-01T09:00:00Z", // KST 18:00
+          endTime: "2025-07-01T10:00:00Z",   // KST 19:00
           memo: "개인적인 메모~~",
-          color: "#FF5733",
+          color: "#FF0000E6",
           hourlyWage: 9860
         },
         {
           id: "schedule_id2",
-          title: "맘스터치",
-          startTime: "2025-07-02T14:00:00Z",
-          endTime: "2025-07-02T16:00:00Z",
+          name: "맘스터치",
+          workPlaceId: "wp_momstouch",
+          startTime: "2025-07-02T05:00:00Z", // KST 14:00
+          endTime: "2025-07-02T07:00:00Z",   // KST 16:00
           memo: "점심 약속",
           color: "#33A1FF",
           hourlyWage: 10000
         },
         {
           id: "schedule_id3",
-          title: "스쿨 피자",
-          startTime: "2025-07-03T18:30:00Z",
-          endTime: "2025-07-03T19:30:00Z",
+          name: "스쿨피자",
+          workPlaceId: "wp_schoolpizza",
+          startTime: "2025-07-03T09:30:00Z", // KST 18:30
+          endTime: "2025-07-03T10:30:00Z",   // KST 19:30
           memo: "맛있는 피자!",
           color: "#28B463",
           hourlyWage: 9500
         },
         {
           id: "schedule_id4",
-          title: "스터디",
-          startTime: "2025-07-04T09:00:00Z",
-          endTime: "2025-07-04T11:00:00Z",
+          name: "스터디",
+          workPlaceId: null,
+          startTime: "2025-07-04T00:00:00Z", // KST 09:00
+          endTime: "2025-07-04T02:00:00Z",   // KST 11:00
           memo: "토익 스터디",
           color: "#9B59B6",
           hourlyWage: null
         },
         {
           id: "schedule_id5",
-          title: "치과 예약",
-          startTime: "2025-07-05T13:00:00Z",
-          endTime: "2025-07-05T13:30:00Z",
+          name: "치과 예약",
+          workPlaceId: null,
+          startTime: "2025-07-05T04:00:00Z", // KST 13:00
+          endTime: "2025-07-05T04:30:00Z",   // KST 13:30
           memo: "스케일링",
           color: "#E67E22",
           hourlyWage: null
         },
         {
           id: "schedule_id6",
-          title: "버거킹",
-          startTime: "2025-07-01T14:00:00Z",
-          endTime: "2025-07-01T17:00:00Z",
+          name: "버거킹",
+          workPlaceId: "wp_burgerking",
+          startTime: "2025-07-01T05:00:00Z", // KST 14:00
+          endTime: "2025-07-01T08:00:00Z",   // KST 17:00
           memo: "개인적인 메모6~~",
           color: "#E67E22",
           hourlyWage: 11000
@@ -123,11 +133,12 @@ export const userData = {
     {
       id: "teamSpace_id1",
       type: "team",
-      name: "천재민의 개인공간",
-      imageUrl: "null",
+      name: "팀 공간",
+      imageUrl: null,
       lastUpdatedAt: "2025-07-01T09:02:11Z",
       members: [
         {
+          id: "mem_kim",
           name: "김지훈",
           color: "#FF5733",
           hourlyWage: 9860,
@@ -141,11 +152,13 @@ export const userData = {
           deductions: "4대 보험"
         },
         {
+          id: "mem_lee",
           name: "이서연",
           color: "#33A1FF",
           hourlyWage: 10000,
           weeklyAllowance: false,
           nightAllowance: true,
+          nightRate: 150,
           nightRate: 150,
           overtimeAllowance: false,
           overtimeRate: 150,
@@ -154,6 +167,7 @@ export const userData = {
           deductions: "4대 보험"
         },
         {
+          id: "mem_park",
           name: "박준영",
           color: "#E67E22",
           hourlyWage: 11000,
@@ -167,6 +181,7 @@ export const userData = {
           deductions: "4대 보험"
         },
         {
+          id: "mem_choi",
           name: "최민지",
           color: "#28B463",
           hourlyWage: 9500,
@@ -182,87 +197,33 @@ export const userData = {
       ],
       schedules: [
         {
-          id: "schedule_id1",
-          title: "천재민",
-          startTime: "2025-07-01T10:00:00Z",
-          endTime: "2025-07-01T11:00:00Z",
+          id: "schedule_id7",
+          name: "김지훈",
+          memberId: "mem_kim",
+          startTime: "2025-07-01T01:00:00Z", // KST 10:00
+          endTime: "2025-07-01T02:00:00Z",   // KST 11:00
           color: "#FF5733",
-          hourlyWage: 9500
+          hourlyWage: 9860
         },
         {
-          id: "schedule_id2",
-          title: "윤찬수",
-          startTime: "2025-07-02T10:00:00Z",
-          endTime: "2025-07-02T12:00:00Z",
+          id: "schedule_id8",
+          name: "이서연",
+          memberId: "mem_lee",
+          startTime: "2025-07-02T01:00:00Z", // KST 10:00
+          endTime: "2025-07-02T03:00:00Z",   // KST 12:00
           color: "#33A1FF",
-          hourlyWage: 9500
+          hourlyWage: 10000
         },
         {
-          id: "schedule_id3",
-          title: "최서연",
-          startTime: "2025-07-03T15:00:00Z",
-          endTime: "2025-07-03T17:00:00Z",
+          id: "schedule_id9",
+          name: "최민지",
+          memberId: "mem_choi",
+          startTime: "2025-07-03T06:00:00Z", // KST 15:00
+          endTime: "2025-07-03T08:00:00Z",   // KST 17:00
           color: "#28B463",
           hourlyWage: 9500
-        },
+        }
       ]
     }
   ]
 };
-
-
-// export const userData = {
-//     email: "chun4582@naver.com",
-//     name: "천재민",
-//     phone: "010-1234-5678",
-//     spaces: [
-//         {
-//             id: "personalSpace_id1",
-//             type: "personal", //혹시나 id만으로는 개인공간, 팀공간 구분이 안될까봐 일단 추가해놨음
-//             name: "천재민의 개인공간",
-//             imageUrl: "null", //s3쓰긴 써야할 듯? 만약에 null일 경우 기본 이미지로 주도록 하기
-//             lastUpdatedAt: "2025-07-01T09:02:11Z",
-//             schedules: [
-//                 {
-//                     id: "schedule_id1",
-//                     title: "롯데리아",
-//                     startTime: "2025-07-01T10:00:00Z",
-//                     endTime: "2025-07-01T11:00:00Z",
-//                     memo: "개인적인 메모~~",
-//                     color: "#FF5733"
-//                 },
-//                 {
-//                     id: "schedule_id2",
-//                     title: "맘스터치",
-//                     startTime: "2025-06-30T10:00:00Z",
-//                     endTime: "2025-06-30T11:00:00Z",
-//                     memo: "개인적인 메모~~2",
-//                     color: "#FF5733"
-//                 }
-//             ]
-//         },
-//         {
-//             id: "teamSpace_id1",
-//             type: "team", //혹시나 id만으로는 개인공간, 팀공간 구분이 안될까봐 일단 추가해놨음
-//             name: "천재민의 개인공간",
-//             imageUrl: "null",
-//             lastUpdatedAt: "2025-07-01T09:02:11Z",
-//             schedules: [
-//                 {   //팀 일정에는 메모가 없음!, 이 부분도 팀원과 논의 해봐야 할 듯
-//                     id: "schedule_id1",
-//                     title: "천재민",
-//                     startTime: "2025-07-01T10:00:00Z",
-//                     endTime: "2025-07-01T11:00:00Z",
-//                     color: "#FF5733"
-//                 },
-//                 {
-//                     id: "schedule_id2",
-//                     title: "윤찬수",
-//                     startTime: "2025-06-30T10:00:00Z",
-//                     endTime: "2025-06-30T11:00:00Z",
-//                     color: "#FF5733"
-//                 }
-//             ]
-//         },
-//     ]
-// }

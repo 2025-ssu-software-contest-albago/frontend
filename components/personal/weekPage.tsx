@@ -1,28 +1,34 @@
-// WeekPage.tsx
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import Column from '@/components/personal/column';
+// 수정된 weekPage.tsx (useLayoutEffect로 날짜 깜빡임 방지)
+import React, { useLayoutEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import WeeklyGrid from './WeeklyGrid';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const TIME_LABEL_WIDTH = 20;
 const HORIZONTAL_PADDING = 20;
 const CELL_WIDTH = (SCREEN_WIDTH - TIME_LABEL_WIDTH - HORIZONTAL_PADDING) / 7;
 
-const WeekPage = React.memo(({ baseDate, offset, selectedSpace, setSpaceModalVisible, hours }) => {
-  const weekStart = useMemo(() => baseDate.add(offset * 7, 'day'), [baseDate, offset]);
-  const weekDates = useMemo(
-    () => Array.from({ length: 7 }, (_, i) => weekStart.add(i, 'day').format('M.D')),
-    [weekStart]
-  );
+const WeekPage = React.memo(({ baseDate, offset, selectedSpace, setSpaceModalVisible, hours, displayDate, selectedCells, onCellToggle }) => {
+  const [weekDates, setWeekDates] = useState([]);
+
+  useLayoutEffect(() => {
+    const weekStart = displayDate.startOf('week');
+    const dates = Array.from({ length: 7 }, (_, i) => weekStart.add(i, 'day').format('M.D'));
+    setWeekDates(dates);
+  }, [displayDate]);
 
   return (
     <View style={styles.page}>
       <Text style={styles.dateRange}>{weekDates[0]} - {weekDates[6]}</Text>
 
+      {/* 상단 요일 + 날짜 텍스트 */}
       <View style={styles.dayHeader}>
         <View style={{ width: TIME_LABEL_WIDTH }} />
         {['일', '월', '화', '수', '목', '금', '토'].map((day, i) => (
-          <Text key={i} style={[styles.dayText, { width: CELL_WIDTH }]}>{day}</Text>
+          <View key={i} style={{ width: CELL_WIDTH, alignItems: 'center' }}>
+            <Text style={styles.dayText}>{day}</Text>
+            <Text style={styles.dateText}>{weekDates[i]}</Text>
+          </View>
         ))}
       </View>
 
@@ -39,9 +45,12 @@ const WeekPage = React.memo(({ baseDate, offset, selectedSpace, setSpaceModalVis
               );
             })}
           </View>
-          {Array.from({ length: 7 }, (_, colIdx) => (
-            <Column key={colIdx} columnIndex={colIdx} hours={hours} CELL_WIDTH={CELL_WIDTH} />
-          ))}
+          <WeeklyGrid
+            hours={hours}
+            CELL_WIDTH={CELL_WIDTH}
+            selectedCells={selectedCells}
+            onCellToggle={onCellToggle}
+          />
         </View>
       </ScrollView>
     </View>
@@ -57,7 +66,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 5,
   },
-  dayText: { textAlign: 'center', fontWeight: 'bold' },
+  dayText: { textAlign: 'center', fontWeight: 'bold', fontSize: 13 },
+  dateText: { fontSize: 12, color: '#666' },
   scheduleGrid: { paddingHorizontal: 10, paddingBottom: 30 },
   timeLabel: {
     height: 30,

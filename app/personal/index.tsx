@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { View, Text, StyleSheet, Dimensions, Pressable } from 'react-native';
 import { useCalTypeStore } from '@/scripts/store/personalStore'
 import Topbar from '@/components/common/Topbar';
 import Month from '@/components/personal/month';
 import Week from '@/components/personal/week';
 import WeekEdit from '@/components/personal/weekEdit';
+
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { Platform } from 'react-native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -13,9 +16,13 @@ export default function CalendarPager() {
   const calendarTypeBtn = useCalTypeStore((state) => state.type);
   const setCalType = useCalTypeStore((state) => state.setCalType);
 
+  const tabBarHeight = useContext(BottomTabBarHeightContext);
+
   return (
     <View
-      style={{ flex: 1 }}
+      style={[{ flex: 1 },
+        Platform.OS === 'ios' ? { marginBottom: tabBarHeight } : null
+      ]}
     >
       <Topbar></Topbar>
       {
@@ -39,17 +46,6 @@ export default function CalendarPager() {
             </Text>
           </Pressable>
       }
-      <Pressable
-        style={({ pressed }) => [
-          styles.calendarTypeBtn2,
-          pressed && { opacity: 0.7 }
-        ]}
-        onPress={() => setCalType("편집")}
-      >
-        <Text style={styles.calendarTypeText}>
-          {"편집"}
-        </Text>
-      </Pressable>
     </View>
   );
 }
@@ -107,18 +103,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 24,           // 하단 여백
     right: 24,            // 우측 여백
-    width: '12%',            // 버튼 크기
-    aspectRatio: '1/1',
-    borderRadius: 25,     // 완전한 원
-    backgroundColor: '#007AFF',  // iOS 스타일 파란색
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,         // 안드로이드 그림자
-  },
-  calendarTypeBtn2: {
-    position: 'absolute',
-    bottom: 24,           // 하단 여백
-    right: 90,            // 우측 여백
     width: '12%',            // 버튼 크기
     aspectRatio: '1/1',
     borderRadius: 25,     // 완전한 원
