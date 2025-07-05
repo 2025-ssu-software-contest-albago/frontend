@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
 import { format } from 'date-fns';
-import { useCalTypeStore } from '@/scripts/store/personalStore';
+import { useCalTypeStore } from '@/scripts/store/teamStore';
 import { useRouter } from 'expo-router';
 
 const { height: screenHeight } = Dimensions.get('window');

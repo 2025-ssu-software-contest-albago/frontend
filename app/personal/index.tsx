@@ -16,12 +16,12 @@ export default function CalendarPager() {
   const calendarTypeBtn = useCalTypeStore((state) => state.type);
   const setCalType = useCalTypeStore((state) => state.setCalType);
 
-  const tabBarHeight = useContext(BottomTabBarHeightContext);
+  const bottomBarHeight = useContext(BottomTabBarHeightContext);
 
   return (
     <View
       style={[{ flex: 1 },
-        Platform.OS === 'ios' ? { marginBottom: tabBarHeight } : null
+      Platform.OS === 'ios' ? { marginBottom: bottomBarHeight } : null
       ]}
     >
       <Topbar></Topbar>

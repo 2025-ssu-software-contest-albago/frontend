@@ -27,6 +27,9 @@ export default function RootLayout() {
             <Stack.Screen name="index" />
             <Stack.Screen name="personal" options={{ headerShown: false }} />
             <Stack.Screen name="team" options={{ headerShown: false }} />
+            {/* <Stack.Screen name="notification" options={{ headerShown: false }} />
+            <Stack.Screen name="appSettings" options={{ headerShown: false }} /> */}
+            <Stack.Screen name="detail" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
           <StatusBar style="auto" />

@@ -2,14 +2,13 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Pressable, StyleSheet, InteractionManager } from 'react-native';
 import { useUserStore } from '@/scripts/store/userStore';
-import { useCalTypeStore, useEditDateStore } from '@/scripts/store/personalStore';
+import { useCalTypeStore, useEditDateStore } from '@/scripts/store/teamStore';
 
 import PagerView from 'react-native-pager-view';
 import Modal from 'react-native-modal';
 import dayjs from 'dayjs';
 import { Ionicons } from '@expo/vector-icons';
 import WeekPage from '@/components/personal/weekPage';
-import { is } from 'date-fns/locale';
 
 export default function WeekEdit() {
     const pagerRef = useRef(null);
@@ -18,25 +17,27 @@ export default function WeekEdit() {
         initialEditDate ? dayjs(initialEditDate).startOf('week') : dayjs().startOf('week')
     );
 
-    const user = useUserStore((state) => state.user);
-    const selectedSpaceIndex = useUserStore((state) => state.selected_space);
-    const setUser = useUserStore((state) => state.setUser);
-    const spaces = user?.spaces[selectedSpaceIndex]?.workPlaces;
-
-    const calendarTypeBtn = useCalTypeStore((state) => state.type);
-    const setCalType = useCalTypeStore((state) => state.setCalType);
-
     const [currentOffset, setCurrentOffset] = useState(0);
     const [spaceModalVisible, setSpaceModalVisible] = useState(false);
-    const [selectedSpace, setSelectedSpace] = useState("선택 안함"); // 기본값으로 첫 번째 근무지 이름 설정
+    const [selectedSpace, setSelectedSpace] = useState('선택 안함');
     const [scrollEnabled, setScrollEnabled] = useState(true);
     const [selectedCellsMap, setSelectedCellsMap] = useState<{
         [weekStart: string]: Record<number, number[]>;
     }>({});
 
+    const user = useUserStore((state) => state.user);
+    const selectedSpaceIndex = useUserStore((state) => state.selected_space);
+    const setUser = useUserStore((state) => state.setUser);
+    const spaces = user?.spaces[selectedSpaceIndex]?.members;
+
+    const calendarTypeBtn = useCalTypeStore((state) => state.type);
+    const setCalType = useCalTypeStore((state) => state.setCalType);
+
+    const hours = useMemo(() => Array.from({ length: 48 }, (_, i) => i * 0.5), []);
+
     function isAllCellsEmpty(selectedCellsMap) {
         if (!selectedCellsMap || typeof selectedCellsMap !== 'object') {
-            return true; 
+            return true;
         }
 
         const weekKeys = Object.keys(selectedCellsMap);
@@ -46,30 +47,27 @@ export default function WeekEdit() {
         }
 
         for (const weekKey of weekKeys) {
-            const dailyCells = selectedCellsMap[weekKey]; 
+            const dailyCells = selectedCellsMap[weekKey];
 
             if (!dailyCells || typeof dailyCells !== 'object') {
                 return false;
             }
 
-            const dayKeys = Object.keys(dailyCells); 
+            const dayKeys = Object.keys(dailyCells);
 
             if (dayKeys.length === 0) {
-                continue; 
+                continue;
             }
 
             for (const dayKey of dayKeys) {
-                const cellsArray = dailyCells[dayKey]; 
+                const cellsArray = dailyCells[dayKey];
                 if (!Array.isArray(cellsArray) || cellsArray.length > 0) {
-                    return false; 
+                    return false;
                 }
             }
         }
         return true;
     }
-
-
-    const hours = useMemo(() => Array.from({ length: 48 }, (_, i) => i * 0.5), []);
 
     const handlePageSelected = (e) => {
         const newPage = e.nativeEvent.position;
@@ -130,17 +128,17 @@ export default function WeekEdit() {
                     const startTime = date.add(startHour, 'hour').toISOString();
                     const endTime = date.add(endHour, 'hour').toISOString();
 
-                    const workPlace = currentSpace.workPlaces.find(wp => wp.name === selectedSpace);
+                    const member = currentSpace.members.find(member => member.name === selectedSpace);
 
                     updatedSchedules.push({
                         id: `schedule_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
                         name: selectedSpace,
-                        workPlaceId: workPlace?.id || null,
+                        memberId: member?.id,
                         startTime,
                         endTime,
                         memo: '',
-                        color: workPlace?.color || '#CCCCCC',
-                        hourlyWage: workPlace?.hourlyWage || null,
+                        color: member?.color || '#CCCCCC',
+                        hourlyWage: member?.hourlyWage,
                     });
 
                     startIdx = null;
@@ -230,7 +228,7 @@ export default function WeekEdit() {
                         <Text style={{ fontSize: 16 }}>수정할 근무지</Text>
                     </View>
 
-                    {spaces.map((space, i) => (
+                    {Array.isArray(spaces) && spaces?.map((space, i) => (
                         <View key={i} style={{ flexDirection: 'row', alignItems: 'center', overflow: 'hidden', marginBottom: 8 }}>
                             <View style={{
                                 width: 6,
