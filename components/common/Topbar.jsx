@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Zustand 전역변수 관리
 import { useUserStore } from '@/scripts/store/userStore';
+import { set } from 'date-fns';
 
 export default function TopBar() {
     const [modalVisible, setModalVisible] = useState(false);
@@ -23,7 +24,7 @@ export default function TopBar() {
 
     const user = useUserStore((state) => state.user);
     const selectedSpaceId = useUserStore((state) => state.selected_space);
-
+    const setSelectedSpace = useUserStore((state) => state.setSelectedSpace);
     return (
         <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
             {/* 왼쪽 영역 */}
@@ -33,16 +34,16 @@ export default function TopBar() {
                     setModalVisible(true);
                 }}
             >
-                {user?.spaces?.[0]?.imageUrl === null ? (
+                {user?.spaces?.[selectedSpaceId]?.imageUrl === null ? (
                     <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>{user?.name?.charAt(0)}</Text>
+                        <Text style={styles.avatarText}>{user?.spaces[selectedSpaceId].name?.charAt(0)}</Text>
                     </View>
                 ) : (
-                    <Image source={{ uri: user?.spaces?.[0]?.imageUrl }} style={styles.avatar} />
+                    <Image source={{ uri: user?.spaces?.[selectedSpaceId]?.imageUrl }} style={styles.avatar} />
                 )}
                 <View style={styles.userInfo}>
                     <View style={styles.nameRow}>
-                        <Text style={styles.name}>{user?.spaces[0]?.name}</Text>
+                        <Text style={styles.name}>{user?.spaces[selectedSpaceId]?.name}</Text>
                         <Ionicons name="chevron-down" size={16} color="#333" />
                     </View>
                     <Text style={styles.email}>{user?.email}</Text>
@@ -79,7 +80,19 @@ export default function TopBar() {
                             <Pressable
                                 key={space.id}
                                 style={styles.spaceItem}
-                                onPress={() => {}}
+                                onPress={() => {
+                                    if (user?.spaces[i]?.type === 'personal' && selectedSpaceId !== i) {
+                                        setModalVisible(false);
+                                        setSelectedSpace(i);
+                                        router.push(`/personal/`);
+                                    } else if (user?.spaces[i]?.type === 'team' && selectedSpaceId !== i) {
+                                        setModalVisible(false);
+                                        setSelectedSpace(i);
+                                        router.push(`/team/`);
+                                    } else {
+                                        setModalVisible(false);
+                                    }
+                                }}
                             >
                                 {space.imageUrl === null || !space.imageUrl ? (
                                     <View style={styles.avatar}>
@@ -96,7 +109,10 @@ export default function TopBar() {
                         ))}
                     </View>
 
-                    <Pressable style={styles.addSpaceButton} onPress={() => { /* Navigate to add new space screen */ }}>
+                    <Pressable style={styles.addSpaceButton} onPress={() => {
+                        setModalVisible(false);
+                        router.push('/addTeamSpace')
+                    }}>
                         <Text style={styles.addSpaceButtonText}>새로운 공간 추가하기</Text>
                     </Pressable>
                 </View>
@@ -160,7 +176,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingBottom: 50,
         paddingTop: 10,
-        width: '100%', 
+        width: '100%',
         alignSelf: 'center',
         // Shadow for iOS
         shadowColor: '#000',
