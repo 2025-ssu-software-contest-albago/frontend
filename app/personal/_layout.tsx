@@ -45,10 +45,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="userProfile"
         options={{
-          title: '내정보',
+          title: '내 정보 ',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
     </Tabs>
+
+    
+      
   );
 }
