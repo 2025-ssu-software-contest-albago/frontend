@@ -10,9 +10,9 @@ import {
 } from 'date-fns';
 
 import { useUserStore } from '@/scripts/store/userStore';
-import { useEditDateStore } from '@/scripts/store/personalStore';
+import { useEditDateStore } from '@/scripts/store/teamStore';
 import { userData } from '@/scripts/dummyData/userData';
-import DailyScheduleModalContent from './DailyScheduleModal'; // import 이름 변경
+import DailyScheduleModalContent from '../team/DailyScheduleModal'; // import 이름 변경
 import Modal from 'react-native-modal'; // react-native-modal import는 그대로 유지
 
 // --- MonthCalendarView 컴포넌트 시작 (React.memo로 감싸서 최적화) ---
@@ -35,7 +35,7 @@ const MonthCalendarView = React.memo(({
     };
 
     const monthSchedulesMap = useMemo(() => {
-        if (selectedSpaceIndex == null || !allUserSchedules[selectedSpaceIndex] || allUserSchedules[selectedSpaceIndex]?.type === "team") return {};
+        if (selectedSpaceIndex == null || !allUserSchedules[selectedSpaceIndex] || allUserSchedules[selectedSpaceIndex]?.type === "personal") return {};
 
         const schedules = allUserSchedules[selectedSpaceIndex].schedules || [];
         const monthStart = startOfMonth(targetMonth);
