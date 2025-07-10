@@ -36,10 +36,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="noticeBoard"
+        name="board"
         options={{
           title: '게시판',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="clipboard" color={color} />,
         }}
       />
       <Tabs.Screen
