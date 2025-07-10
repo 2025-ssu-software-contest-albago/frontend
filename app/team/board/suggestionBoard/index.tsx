@@ -56,17 +56,34 @@ export default function SuggestionBoardScreen() {
         onPress={() => {
           router.push(`/team/board/suggestionBoard/${item.id}` as any);
         }}
+        activeOpacity={0.85}
       >
-        <View style={styles.textContainer}>
-          <Text style={[styles.postTitle, { 
-            color: FIXED_COLORS.postTitleText, 
-            marginLeft: textLeftMargin - CARD_HORIZONTAL_PADDING 
-          }]}>{item.title}</Text>
-          
-          <Text style={[styles.postDate, { 
-            color: FIXED_COLORS.postDateText, 
-            marginLeft: textLeftMargin - CARD_HORIZONTAL_PADDING 
-          }]}>{item.date}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flex: 1 }}>
+            <Text style={[
+              styles.postTitle,
+              {
+                color: FIXED_COLORS.postTitleText,
+                marginLeft: textLeftMargin - CARD_HORIZONTAL_PADDING,
+              }
+            ]}>{item.title}</Text>
+            <Text style={[
+              styles.postDate,
+              {
+                color: FIXED_COLORS.postDateText,
+                marginLeft: textLeftMargin - CARD_HORIZONTAL_PADDING
+              }
+            ]}>{item.date}</Text>
+          </View>
+          {/* 카드 내부 오른쪽 세로 중앙에 수정/삭제 아이콘 */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
+            <TouchableOpacity onPress={(e) => { e.stopPropagation(); alert('수정 기능은 준비 중입니다.'); }} style={{ padding: 4 }}>
+              <AntDesign name="edit" size={18} color="#1976d2" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={(e) => { e.stopPropagation(); alert('삭제 기능은 준비 중입니다.'); }} style={{ padding: 4, marginLeft: 2 }}>
+              <AntDesign name="delete" size={18} color="#e53935" />
+            </TouchableOpacity>
+          </View>
         </View>
       </TouchableOpacity>
     );
