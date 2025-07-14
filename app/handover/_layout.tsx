@@ -5,25 +5,19 @@ export default function DetailStackLayout() {
   return (
     <Stack>
       <Stack.Screen
-        name="personalScheduleDetail"
+        name="index"
         options={{
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="teamUserDetail"
+        name="detail"
         options={{
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="teamUserDetailEdit"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="teamUserScheduleList"
+        name="addHandover"
         options={{
           headerShown: false,
         }}

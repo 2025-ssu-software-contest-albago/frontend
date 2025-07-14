@@ -54,11 +54,6 @@ const DailyScheduleModalContent: React.FC<DailyScheduleModalContentProps> = ({
 
     return (
         <View style={modalStyles.modalContainer}>
-            {/* 닫기 버튼 */}
-            <Pressable onPress={onClose} style={modalStyles.closeButton}>
-                <Text style={modalStyles.closeButtonText}>X</Text>
-            </Pressable>
-
             <Text style={modalStyles.modalDate}>{formattedDate}</Text>
 
             <ScrollView style={modalStyles.scheduleList}>

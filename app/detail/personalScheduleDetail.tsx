@@ -94,7 +94,7 @@ const PersonalScheduleDetail: React.FC = () => {
 
             <View style={styles.timeSection}>
                 <Text style={styles.timeRange}>{formattedTimeRange}</Text>
-                <Text style={styles.durationText}>{displayDuration}시간</Text> {/* 시간을 소수점 한 자리까지 표시 */}
+                <Text style={styles.durationText}>{displayDuration}시간</Text> 
             </View>
 
             <Pressable style={[styles.requestShiftButton, space_type === 'personal' ? { backgroundColor: '#ccc' } : { backgroundColor: '#FFEE58',}]} 
@@ -105,12 +105,12 @@ const PersonalScheduleDetail: React.FC = () => {
             </Pressable>
 
             <View style={styles.financeSection}>
-                {/* 총액 표시 */}
+
                 <View style={styles.financeItem}>
                     <Text style={styles.financeLabel}>총액</Text>
                     <Text style={styles.financeValue}>{totalPrice.toLocaleString()}원</Text>
                 </View>
-                {/* 시급 표시 */}
+
                 <View style={styles.financeItem}>
                     <Text style={styles.financeLabel}>시급</Text>
                     <Text style={styles.financeValue}>{typeof schedule.hourlyWage === 'number' ? schedule.hourlyWage.toLocaleString() : '0'}원</Text>
