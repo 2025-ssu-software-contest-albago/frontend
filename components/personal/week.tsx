@@ -1,4 +1,3 @@
-// 수정된 PersonalWeek.tsx (스와이프 중 렌더링 보장 후 다음 스와이프 허용)
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -6,7 +5,6 @@ import {
   StyleSheet,
   Dimensions,
   ScrollView,
-  Platform,
   InteractionManager,
 } from 'react-native';
 import PagerView from 'react-native-pager-view';
@@ -23,8 +21,12 @@ export default function PersonalWeek() {
   const user = useUserStore((state) => state.user);
   const selected_space = useUserStore((state) => state.selected_space);
 
-  const getCurrentWeek = (offset = 0) => {
-    const start = startOfWeek(addWeeks(baseDate, offset), { weekStartsOn: 0 });
+  // 더블버퍼링 overlay
+  const [showCover, setShowCover] = useState(false);
+  const [coverDate, setCoverDate] = useState(null);
+
+  const getCurrentWeek = (date) => {
+    const start = startOfWeek(date, { weekStartsOn: 0 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   };
 
@@ -34,7 +36,6 @@ export default function PersonalWeek() {
     let endHour = 18;
 
     const weekDateStrs = weekDates.map((d) => format(d, 'yyyy-MM-dd'));
-
     schedules.forEach((s) => {
       const localStart = parseISO(s.startTime);
       const localEnd = parseISO(s.endTime);
@@ -54,8 +55,8 @@ export default function PersonalWeek() {
     return [startHour, endHour, hourBlockHeight, totalHours, totalHeight];
   };
 
-  const renderWeek = (offset) => {
-    const weekDates = getCurrentWeek(offset);
+  const renderWeek = (targetDate) => {
+    const weekDates = getCurrentWeek(targetDate);
     const [startHour, endHour, hourBlockHeight, , totalHeight] = getTimeBounds(weekDates);
     const schedules = user?.spaces?.[selected_space]?.schedules || [];
 
@@ -73,7 +74,7 @@ export default function PersonalWeek() {
     }
 
     return (
-      <View key={offset} style={styles.weekContainer}>
+      <View style={styles.weekContainer}>
         <Text style={styles.dateRangeText}>
           {format(weekDates[0], 'M월 d일')} - {format(weekDates[6], 'M월 d일')}
         </Text>
@@ -117,11 +118,7 @@ export default function PersonalWeek() {
                         key={i}
                         style={[
                           styles.scheduleBlock,
-                          {
-                            top,
-                            height,
-                            backgroundColor: s.color || '#ccc',
-                          },
+                          { top, height, backgroundColor: s.color || '#ccc' },
                         ]}
                       >
                         <Text style={styles.scheduleText}>{s.name}</Text>
@@ -137,35 +134,60 @@ export default function PersonalWeek() {
     );
   };
 
+  const renderWeekPage = (offset) => {
+    const targetDate = addWeeks(baseDate, offset);
+    return (
+      <View key={offset} style={{ flex: 1 }}>
+        {renderWeek(targetDate)}
+      </View>
+    );
+  };
+
   const handlePageSelected = (e) => {
     const newPage = e.nativeEvent.position;
     const offset = newPage - 1;
+
     if (offset !== 0) {
       setScrollEnabled(false);
       const newBase = addWeeks(baseDate, offset);
+
+      setCoverDate(newBase);
+      setShowCover(true);
+
       setTimeout(() => {
         setBaseDate(newBase);
         pagerRef.current?.setPageWithoutAnimation(1);
         InteractionManager.runAfterInteractions(() => {
           setScrollEnabled(true);
+          setShowCover(false);
         });
       }, 0);
     }
   };
 
   return (
-    <PagerView
-      ref={pagerRef}
-      initialPage={1}
-      onPageSelected={handlePageSelected}
-      scrollEnabled={scrollEnabled}
-      style={{ flex: 1 }}
-    >
-      {[-1, 0, 1].map((offset) => renderWeek(offset))}
-    </PagerView>
+    <View style={{ flex: 1 }}>
+      <PagerView
+        ref={pagerRef}
+        initialPage={1}
+        onPageSelected={handlePageSelected}
+        scrollEnabled={scrollEnabled}
+        style={{ flex: 1 }}
+      >
+        {[-1, 0, 1].map((offset) => renderWeekPage(offset))}
+      </PagerView>
+
+      {showCover && coverDate && (
+        <View style={{
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: '#fff', zIndex: 1
+        }}>
+          {renderWeek(coverDate)}
+        </View>
+      )}
+    </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   weekContainer: {
@@ -224,4 +246,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

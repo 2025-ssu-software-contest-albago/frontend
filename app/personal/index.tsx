@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import { View, Text, StyleSheet, Dimensions, Pressable } from 'react-native';
-import { useCalTypeStore } from '@/scripts/store/personalStore'
 import Topbar from '@/components/common/Topbar';
 import Month from '@/components/personal/month';
 import Week from '@/components/personal/week';
 import WeekEdit from '@/components/personal/weekEdit';
+import { useCalTypeStore } from '@/scripts/store/personalStore';
+import React, { useContext, useState } from 'react';
+import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { Platform } from 'react-native';
@@ -15,7 +15,6 @@ export default function CalendarPager() {
   const [calendarWidth, setCalendarWidth] = useState(screenWidth);
   const calendarTypeBtn = useCalTypeStore((state) => state.type);
   const setCalType = useCalTypeStore((state) => state.setCalType);
-
   const bottomBarHeight = useContext(BottomTabBarHeightContext);
 
   return (
@@ -110,6 +109,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,         // 안드로이드 그림자
+    zIndex: 5,
   },
   calendarTypeText: {
     fontSize: 15,

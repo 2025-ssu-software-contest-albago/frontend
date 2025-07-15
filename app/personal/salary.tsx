@@ -1,110 +1,153 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useUserStore } from '@/scripts/store/userStore';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import dayjs from 'dayjs';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+export default function PersonalSalary() {
+  const user = useUserStore(state => state.user);
+  const selectedSpaceIndex = useUserStore(state => state.selected_space);
+  const selectedSpace = user?.spaces[selectedSpaceIndex];
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
 
-export default function Salary() {
+  const [currentMonth, setCurrentMonth] = useState(dayjs());
+
+  if (!user || !selectedSpace) {
+    return (
+      <View style={styles.centered}>
+        <Text>사용자 데이터를 불러오는 중...</Text>
+      </View>
+    );
+  }
+
+  // 현재 달 스케줄 필터
+  const monthSchedules = useMemo(() => {
+    return selectedSpace.schedules.filter(schedule =>
+      dayjs(schedule.startTime).isSame(currentMonth, 'month')
+    );
+  }, [selectedSpace, currentMonth]);
+
+  // 근무지별 데이터로 그룹핑
+  const workPlaceStats = useMemo(() => {
+    const stats = {};
+    monthSchedules.forEach(sch => {
+      const duration = dayjs(sch.endTime).diff(dayjs(sch.startTime), 'hour', true);
+      if (!stats[sch.workPlaceId]) {
+        stats[sch.workPlaceId] = { name: sch.name, color: sch.color, totalAmount: 0, totalHours: 0 };
+      }
+      stats[sch.workPlaceId].totalAmount += duration * sch.hourlyWage;
+      stats[sch.workPlaceId].totalHours += duration;
+    });
+    return stats;
+  }, [monthSchedules]);
+
+  // 총액 & 총시간
+  const totalAmount = Object.values(workPlaceStats).reduce((acc, w) => acc + w.totalAmount, 0);
+  const totalHours = Object.values(workPlaceStats).reduce((acc, w) => acc + w.totalHours, 0);
+
+  // 현재 달 기간
+  const period = `${currentMonth.startOf('month').format('M.D')} - ${currentMonth.endOf('month').format('M.D')}`;
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
+    <ScrollView style={[styles.container, { paddingTop: insets.top + 30 }]}>
+      <TouchableOpacity onPress={() => router.push('/detail/personalTotalSalary')}>
+        <View style={styles.totalCard}>
+          <Text style={styles.monthTitle}>{currentMonth.format('M')}월 총 금액</Text>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>총액</Text>
+            <Text style={styles.totalValue}>{Math.round(totalAmount).toLocaleString()}원</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+
+      <View style={styles.workCard}>
+        <Text style={styles.workTitle}>근무지 관리</Text>
+        {selectedSpace?.workPlaces?.map(wp => {
+          const stats = workPlaceStats[wp.id] ?? { totalAmount: 0, totalHours: 0 };
+          return (
+            <View key={wp.id} style={styles.workRow}>
+              <View style={[styles.colorBar, { backgroundColor: wp.color }]} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.workName}>{wp.name}</Text>
+                <Text style={styles.period}>{period}</Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.amount}>{Math.round(stats.totalAmount).toLocaleString()}원</Text>
+                <Text style={styles.hours}>{Math.round(stats.totalHours)}시간</Text>
+              </View>
+            </View>
+          );
         })}
-      </Collapsible>
-    </ParallaxScrollView>
+
+        <TouchableOpacity style={styles.addRow} onPress={()=>{
+          router.push("/addWorkPlace")
+        }}>
+          <Text style={styles.addText}>+ 근무지 추가하기</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16 },
+  totalCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
+    alignItems: 'center'
   },
-  titleContainer: {
+  monthTitle: {
+    fontSize: 16, color: '#888', marginBottom: 50
+  },
+  totalRow: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: "100%",
+  },
+  totalLabel: {
+    fontSize: 16, fontWeight: '600', color: '#333'
+  },
+  totalValue: {
+    fontSize: 20, color: '#0057ff'
+  },
+  workCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, elevation: 2
+  },
+  workTitle: {
+    fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 16
+  },
+  workRow: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    marginBottom: 16
   },
+  colorBar: {
+    width: 4, height: 40, borderRadius: 2, marginRight: 12
+  },
+  workName: {
+    fontSize: 15, fontWeight: '600', color: '#333'
+  },
+  period: {
+    fontSize: 12, color: '#999'
+  },
+  amount: {
+    fontSize: 15, fontWeight: '600', color: '#333'
+  },
+  hours: {
+    fontSize: 12, color: '#777'
+  },
+  addRow: {
+    flexDirection: 'row', alignItems: 'center'
+  },
+  addText: {
+    color: '#555', fontSize: 14
+  },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

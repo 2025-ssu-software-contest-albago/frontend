@@ -27,12 +27,17 @@ export default function RootLayout() {
             <Stack.Screen name="index" />
             <Stack.Screen name="personal" options={{ headerShown: false }} />
             <Stack.Screen name="team" options={{ headerShown: false }} />
+            <Stack.Screen name="detail" options={{ headerShown: false }} />
+            <Stack.Screen name="handover" options={{ headerShown: false }} />
+            <Stack.Screen name="memo" options={{ headerShown: false }} />
             <Stack.Screen 
               name="appSettings" 
               options={{title: '설정',
                 headerStyle: { backgroundColor: colorScheme === 'dark' ? DarkTheme.colors.card : DefaultTheme.colors.card},
                 headerTintColor: colorScheme === 'dark' ? DarkTheme.colors.text : DefaultTheme.colors.text}}/>
             <Stack.Screen name="+not-found" />
+            <Stack.Screen name="addWorkPlace" options={{ headerShown: false }} /> 
+            <Stack.Screen name="addTeamSpace" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         </ThemeProvider>

@@ -5,9 +5,39 @@ export default function DetailStackLayout() {
   return (
     <Stack>
       <Stack.Screen
-        name="personalScheduleDetail" // 이 폴더 내의 scheduleDetail.tsx 파일을 가리킵니다.
+        name="personalScheduleDetail"
         options={{
-          headerShown: false, // ScheduleDetail 컴포넌트 내부에서 헤더를 그릴 것이므로 숨깁니다.
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="teamUserDetail"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="teamUserDetailEdit"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="teamUserScheduleList"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="personalTotalSalary"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="personalPlaceSalary"
+        options={{
+          headerShown: false,
         }}
       />
     </Stack>
