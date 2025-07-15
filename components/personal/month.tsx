@@ -12,10 +12,9 @@ import {
 import { useUserStore } from '@/scripts/store/userStore';
 import { useEditDateStore } from '@/scripts/store/personalStore';
 import { userData } from '@/scripts/dummyData/userData';
-import DailyScheduleModalContent from './DailyScheduleModal'; // import 이름 변경
-import Modal from 'react-native-modal'; // react-native-modal import는 그대로 유지
+import DailyScheduleModalContent from './DailyScheduleModal';
+import Modal from 'react-native-modal';
 
-// --- MonthCalendarView 컴포넌트 시작 (React.memo로 감싸서 최적화) ---
 const MonthCalendarView = React.memo(({
     targetMonth,
     calendarWidth,
@@ -36,7 +35,6 @@ const MonthCalendarView = React.memo(({
 
     const monthSchedulesMap = useMemo(() => {
         if (selectedSpaceIndex == null || !allUserSchedules[selectedSpaceIndex] || allUserSchedules[selectedSpaceIndex]?.type === "team") return {};
-
         const schedules = allUserSchedules[selectedSpaceIndex].schedules || [];
         const monthStart = startOfMonth(targetMonth);
         const monthEnd = endOfMonth(targetMonth);
@@ -75,7 +73,6 @@ const MonthCalendarView = React.memo(({
                         {Array(7).fill(null).map((_, colIdx) => {
                             const dateIndex = rowIdx * 7 + colIdx;
                             const date = monthDays[dateIndex];
-
                             const dateKey = date ? format(date, 'yyyy-MM-dd') : null;
                             const daySchedules = dateKey ? monthSchedulesMap[dateKey] || [] : [];
 
@@ -118,8 +115,6 @@ const MonthCalendarView = React.memo(({
         </View>
     );
 });
-// --- MonthCalendarView 컴포넌트 끝 ---
-
 
 export default function PersonalMonth() {
     const { width: screenWidth } = Dimensions.get('window');
@@ -134,11 +129,14 @@ export default function PersonalMonth() {
     const [selectedDateForModal, setSelectedDateForModal] = useState(null);
     const [schedulesForModal, setSchedulesForModal] = useState([]);
 
+    // 더블버퍼링용
+    const [showCover, setShowCover] = useState(false);
+    const [coverDate, setCoverDate] = useState(null);
+
     const user = useUserStore((state) => state.user);
     const setUser = useUserStore((state) => state.setUser);
     const selected_space = useUserStore((state) => state.selected_space);
-
-    const setEditDate = useEditDateStore((state) => state.setEditDate); // 추가
+    const setEditDate = useEditDateStore((state) => state.setEditDate);
 
     useEffect(() => {
         setUser(userData);
@@ -158,16 +156,19 @@ export default function PersonalMonth() {
 
         if (monthOffset !== 0) {
             setScrollEnabled(false);
+            const newDate = addMonths(baseDate, monthOffset);
 
-            const newBase = addMonths(baseDate, monthOffset);
+            setCoverDate(newDate);
+            setShowCover(true);
 
             setTimeout(() => {
-                setBaseDate(newBase);
+                setBaseDate(newDate);
                 if (pagerRef.current) {
                     pagerRef.current.setPageWithoutAnimation(1);
                 }
                 InteractionManager.runAfterInteractions(() => {
                     setScrollEnabled(true);
+                    setShowCover(false);
                 });
             }, 0);
         }
@@ -182,12 +183,10 @@ export default function PersonalMonth() {
 
     const handleCloseModal = () => {
         setIsModalVisible(false);
-        // react-native-modal의 onModalHide 콜백을 사용하여 상태를 초기화하는 것이 더 정확합니다.
-        // 현재는 애니메이션 종료 시간을 예측하여 setTimeout으로 지연 처리합니다.
         setTimeout(() => {
             setSelectedDateForModal(null);
             setSchedulesForModal([]);
-        }, 300); // animationOut 시간 (기본 300ms)과 비슷하게 설정
+        }, 300);
     };
 
     const handleAddSchedule = (date) => {
@@ -230,26 +229,43 @@ export default function PersonalMonth() {
                 {[-1, 0, 1].map((offset) => renderOptimizedMonth(offset))}
             </PagerView>
 
-            {/* Daily Schedule Modal */}
+            {showCover && coverDate && (
+                <View style={{
+                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: '#fff',
+                    zIndex: 1,
+                }}>
+                    <MonthCalendarView
+                        targetMonth={coverDate}
+                        calendarWidth={calendarWidth}
+                        allUserSchedules={user?.spaces || []}
+                        selectedSpaceIndex={selected_space}
+                        WEEK_DAYS={WEEK_DAYS}
+                        currentMonthNumRows={Math.ceil(getMonthDays(coverDate).length / 7)}
+                        styles={styles}
+                        onDatePress={handleDatePress}
+                    />
+                </View>
+            )}
+
             <Modal
-                isVisible={isModalVisible} // react-native-modal의 isVisible prop 사용
-                onBackdropPress={handleCloseModal} // 배경 클릭 시 닫기
-                onSwipeComplete={handleCloseModal} // 스와이프하여 닫기
-                // swipeDirection={['down']} // 아래로 스와이프할 때 닫기
-                style={modalStyles.bottomModal} // 아래에서 올라오는 스타일
-                animationIn="slideInUp" // 나타나는 애니메이션
-                animationOut="slideOutDown" // 사라지는 애니메이션
-                backdropOpacity={0.4} // 배경 불투명도
-                onModalHide={() => { // 모달이 완전히 사라진 후 상태 초기화
+                isVisible={isModalVisible}
+                onBackdropPress={handleCloseModal}
+                onSwipeComplete={handleCloseModal}
+                style={modalStyles.bottomModal}
+                animationIn="slideInUp"
+                animationOut="slideOutDown"
+                backdropOpacity={0.4}
+                onModalHide={() => {
                     setSelectedDateForModal(null);
                     setSchedulesForModal([]);
                 }}
             >
-                <DailyScheduleModalContent // 수정된 이름 사용
+                <DailyScheduleModalContent
                     selectedDate={selectedDateForModal}
                     dailySchedules={schedulesForModal}
                     onAddSchedule={handleAddSchedule}
-                    onClose={handleCloseModal} // DailyScheduleModalContent 내부의 닫기 버튼을 위해 전달
+                    onClose={handleCloseModal}
                 />
             </Modal>
         </View>
@@ -325,13 +341,9 @@ const styles = StyleSheet.create({
     },
 });
 
-// react-native-modal의 스타일
 const modalStyles = StyleSheet.create({
     bottomModal: {
-        justifyContent: 'flex-end', // 모달을 화면 아래에 정렬
-        margin: 0, // 화면 전체 너비를 사용하도록 마진 제거
+        justifyContent: 'flex-end',
+        margin: 0,
     },
-    // DailyScheduleModalContent 내부의 modalContainer와 중복되지 않도록 이름을 다르게 지정하거나 제거
-    // 그러나 DailyScheduleModalContent가 순수하게 '콘텐츠'만 담당하므로,
-    // 그 내부의 modalContainer 스타일은 그대로 유지합니다.
 });

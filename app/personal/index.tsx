@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,         // 안드로이드 그림자
+    zIndex: 5,
   },
   calendarTypeText: {
     fontSize: 15,

@@ -48,7 +48,7 @@ const PersonalScheduleDetail: React.FC = () => {
 
     if (!schedule) {
         return (
-            <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
+            <View style={[styles.container, { marginTop: insets.top }]}>
                 <Pressable onPress={() => navigation.goBack()} style={styles.closeButtonTop}>
                     <Ionicons name="chevron-back" size={24} color="#333" />
                 </Pressable>

@@ -100,26 +100,6 @@ export const userData = {
           hourlyWage: 9500
         },
         {
-          id: "schedule_id4",
-          name: "스터디",
-          workPlaceId: null,
-          startTime: "2025-07-04T00:00:00Z", // KST 09:00
-          endTime: "2025-07-04T02:00:00Z",   // KST 11:00
-          memo: "토익 스터디",
-          color: "#9B59B6",
-          hourlyWage: null
-        },
-        {
-          id: "schedule_id5",
-          name: "치과 예약",
-          workPlaceId: null,
-          startTime: "2025-07-05T04:00:00Z", // KST 13:00
-          endTime: "2025-07-05T04:30:00Z",   // KST 13:30
-          memo: "스케일링",
-          color: "#E67E22",
-          hourlyWage: null
-        },
-        {
           id: "schedule_id6",
           name: "버거킹",
           workPlaceId: "wp_burgerking",

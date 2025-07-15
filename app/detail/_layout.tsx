@@ -28,6 +28,18 @@ export default function DetailStackLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="personalTotalSalary"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="personalPlaceSalary"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

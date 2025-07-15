@@ -36,6 +36,8 @@ export default function RootLayout() {
                 headerStyle: { backgroundColor: colorScheme === 'dark' ? DarkTheme.colors.card : DefaultTheme.colors.card},
                 headerTintColor: colorScheme === 'dark' ? DarkTheme.colors.text : DefaultTheme.colors.text}}/>
             <Stack.Screen name="+not-found" />
+            <Stack.Screen name="addWorkPlace" options={{ headerShown: false }} /> 
+            <Stack.Screen name="addTeamSpace" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         </ThemeProvider>

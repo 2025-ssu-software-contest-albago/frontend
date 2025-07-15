@@ -71,7 +71,6 @@ export default function CalendarPager() {
               isVisible={menuModalVisible}
               onBackdropPress={() => setMenuModalVisible(false)}
               onModalHide={() => {
-                console.log("▶ 메뉴 모달 완전히 닫힘");
                 if (nextAction) {
                   console.log("▶ nextAction 실행");
                   nextAction();
@@ -208,6 +207,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,         // 안드로이드 그림자
+    zIndex: 5,
   },
   calendarTypeText: {
     fontSize: 15,
@@ -224,6 +224,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,
+    zIndex: 5,
   },
   menuModalContent: {
     backgroundColor: 'white',
