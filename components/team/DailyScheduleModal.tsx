@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, Dimensions } from 'react
 import { format } from 'date-fns';
 import { useCalTypeStore } from '@/scripts/store/teamStore';
 import { useRouter } from 'expo-router';
+import { scheduleColors } from '@/scripts/color/scheduleColor';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -71,7 +72,7 @@ const DailyScheduleModalContent: React.FC<DailyScheduleModalContentProps> = ({
                                 style={modalStyles.scheduleItem}
                                 onPress={() => handleScheduleItemClick(schedule)} // 클릭 이벤트 핸들러 연결
                             >
-                                <View style={[modalStyles.scheduleColorBar, { backgroundColor: schedule.color || '#ccc' }]} />
+                                <View style={[modalStyles.scheduleColorBar, { backgroundColor: scheduleColors[schedule.color]?.main || '#ccc' }]} />
                                 <View style={modalStyles.scheduleDetails}>
                                     <Text style={modalStyles.scheduleName}>{schedule.name}</Text>
                                     <Text style={modalStyles.schedulePrice}>

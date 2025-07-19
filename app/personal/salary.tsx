@@ -5,6 +5,7 @@ import { useUserStore } from '@/scripts/store/userStore';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import dayjs from 'dayjs';
+import { scheduleColors } from '@/scripts/color/scheduleColor';
 
 export default function PersonalSalary() {
   const user = useUserStore(state => state.user);
@@ -69,7 +70,7 @@ export default function PersonalSalary() {
           const stats = workPlaceStats[wp.id] ?? { totalAmount: 0, totalHours: 0 };
           return (
             <View key={wp.id} style={styles.workRow}>
-              <View style={[styles.colorBar, { backgroundColor: wp.color }]} />
+              <View style={[styles.colorBar, { backgroundColor: scheduleColors[wp.color].main }]} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.workName}>{wp.name}</Text>
                 <Text style={styles.period}>{period}</Text>

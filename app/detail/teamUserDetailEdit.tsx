@@ -7,6 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useUserStore } from '@/scripts/store/userStore';
 
+import ColorPickerModal from '../../components/common/ColorPickerModal'; // 경로에 맞게 수정
+import { scheduleColors } from '../../scripts/color/scheduleColor'
+
 export default function TeamUserDetailEdit() {
     const { memberId } = useLocalSearchParams();
     const { user, setUser } = useUserStore();
@@ -51,6 +54,8 @@ export default function TeamUserDetailEdit() {
             setHolidayRate(String(foundMember.holidayRate || '150'));
         }
     }, [user, memberId]);
+
+    const [colorModalVisible, setColorModalVisible] = useState(false);
 
     const handleSave = () => {
         if (!user) return;
@@ -132,7 +137,10 @@ export default function TeamUserDetailEdit() {
                 <View style={styles.card}>
                     <View style={styles.row}>
                         <Text style={styles.label}>색상</Text>
-                        <View style={[styles.colorDot, { backgroundColor: color }]} />
+                        <TouchableOpacity onPress={() => setColorModalVisible(true)} style={styles.colorBox}>
+                            <View style={[styles.colorDot, { backgroundColor: color }]} />
+                            <Feather name="chevron-down" size={18} color="#555" />
+                        </TouchableOpacity>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.label}>직급</Text>
@@ -185,6 +193,13 @@ export default function TeamUserDetailEdit() {
                     <Text style={styles.deleteText}>팀원 삭제하기</Text>
                 </TouchableOpacity>
             </ScrollView>
+            <ColorPickerModal
+                visible={colorModalVisible}
+                onClose={() => setColorModalVisible(false)}
+                onSelect={(colorName) => {
+                    setColor(scheduleColors[colorName].main);
+                }}
+            />
         </View>
     );
 }
@@ -233,4 +248,18 @@ const styles = StyleSheet.create({
     },
     deleteText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    colorBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 1,
+        elevation: 1, // Android shadow
+        gap: 8,
+    },
 });

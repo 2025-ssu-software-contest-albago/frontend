@@ -14,6 +14,7 @@ import { useEditDateStore } from '@/scripts/store/personalStore';
 import { userData } from '@/scripts/dummyData/userData';
 import DailyScheduleModalContent from './DailyScheduleModal';
 import Modal from 'react-native-modal';
+import { scheduleColors } from '@/scripts/color/scheduleColor';
 
 const MonthCalendarView = React.memo(({
     targetMonth,
@@ -93,10 +94,13 @@ const MonthCalendarView = React.memo(({
                                                     key={idx}
                                                     style={[
                                                         styles.scheduleTag,
-                                                        { backgroundColor: s.color || '#ccc' },
+                                                        { backgroundColor: scheduleColors[s.color].background || '#ccc' },
                                                     ]}
                                                 >
-                                                    <Text style={styles.scheduleTitleText}>{s.name}</Text>
+                                                    <Text style={[
+                                                            styles.scheduleTitleText,
+                                                            {color : scheduleColors[s.color].font}
+                                                        ]}>{s.name}</Text>
                                                 </View>
                                             ))}
                                             {daySchedules.length > 3 && (
