@@ -112,7 +112,7 @@ export default function PopularPostDetailScreen() {
           <Text style={styles.commentsTitle}>댓글 {comments.length}개</Text>
           <TouchableOpacity 
             onPress={() => router.push({
-              pathname: '/community/popular/comment',
+              pathname: '/community/free/comment',
               params: { postId: post.id }
             })}
             style={styles.addCommentLink}
@@ -152,7 +152,7 @@ export default function PopularPostDetailScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => router.push({
-                      pathname: '/community/popular/comment/[commentId]',
+                      pathname: '/community/free/comment/[commentId]',
                       params: { commentId: comment.id, postId: post.id }
                     })}
                   >
