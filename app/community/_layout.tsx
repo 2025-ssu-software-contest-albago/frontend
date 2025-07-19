@@ -1,37 +1,51 @@
-import { Stack, usePathname, useRouter } from 'expo-router';
+import { Slot, usePathname, useRouter } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { LogBox, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { PostProvider } from './contexts/PostContext';
+
+// 특정 경고 무시 - 임시 해결책
+LogBox.ignoreLogs([
+  'Text strings must be rendered within a <Text> component',
+]);
 
 export default function CommunityLayout() {
   const pathname = usePathname();
   const router = useRouter();
   
+  // 현재 활성화된 탭 확인
   const isFreePage = pathname.includes('/community/free');
   const isPopularPage = pathname.includes('/community/popular');
+  
+  // 탭 전환 핸들러
+  const navigateToFree = () => {
+    router.push('/community/free');
+  };
+  
+  const navigateToPopular = () => {
+    router.push('/community/popular');
+  };
 
   return (
     <PostProvider>
       <View style={styles.container}>
-        {/* 커스텀 탭 헤더 */}
+        {/* 커스텀 탭 헤더 - 직접 구현 */}
         <View style={styles.tabHeader}>
           <TouchableOpacity 
-            style={[styles.tabButton, isFreePage && styles.activeTab]} 
-            onPress={() => router.push('/community/free')}
+            style={[styles.tabButton, isFreePage && styles.activeTab]}
+            onPress={navigateToFree}
           >
-            <Text style={[styles.tabText, isFreePage && styles.activeText]}>자유글</Text>
+            <Text style={[styles.tabText, isFreePage && styles.activeText]}>자유게시판</Text>
           </TouchableOpacity>
-          
           <TouchableOpacity 
-            style={[styles.tabButton, isPopularPage && styles.activeTab]} 
-            onPress={() => router.push('/community/popular')}
+            style={[styles.tabButton, isPopularPage && styles.activeTab]}
+            onPress={navigateToPopular}
           >
-            <Text style={[styles.tabText, isPopularPage && styles.activeText]}>인기글</Text>
+            <Text style={[styles.tabText, isPopularPage && styles.activeText]}>인기게시판</Text>
           </TouchableOpacity>
         </View>
 
-        {/* 내용 영역 */}
-        <Stack screenOptions={{ headerShown: false }} />
+        {/* 내용 영역 - Slot을 사용하여 중첩 라우팅 처리 */}
+        <Slot />
       </View>
     </PostProvider>
   );

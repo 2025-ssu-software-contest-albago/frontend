@@ -1,13 +1,17 @@
 import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { usePostContext } from '../contexts/PostContext';
 
 export default function FreePostDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { getPostById, getCommentsByPostId, likePost, likeComment } = usePostContext();
+  const { getPostById, getCommentsByPostId, togglePostLike, toggleCommentLike } = usePostContext();
+  
+  // 사용자의 좋아요 상태를 추적하기 위한 상태 추가
+  const [postLiked, setPostLiked] = useState(false);
+  const [commentLikes, setCommentLikes] = useState<Record<string, boolean>>({});
   
   // 게시글 정보 가져오기
   const post = getPostById(id as string) || {
@@ -22,14 +26,42 @@ export default function FreePostDetailScreen() {
   // 댓글 목록 가져오기
   const comments = getCommentsByPostId(id as string);
 
-  // 좋아요 처리 함수
+  // 좋아요 처리 함수 - 토글 방식으로 변경
   const handleLike = () => {
-    likePost(id as string);
+    // 좋아요 상태 토글
+    const newLikedState = !postLiked;
+    setPostLiked(newLikedState);
+    
+    // Context를 통해 좋아요 수 업데이트
+    togglePostLike(id as string, newLikedState);
   };
 
-  // 댓글 좋아요 처리 함수
+  // 댓글 좋아요 처리 함수 - 토글 방식으로 변경
   const handleCommentLike = (commentId: string) => {
-    likeComment(commentId);
+    // 현재 댓글의 좋아요 상태
+    const currentLiked = commentLikes[commentId] || false;
+    
+    // 좋아요 상태 토글
+    const newLikedState = !currentLiked;
+    
+    // 상태 업데이트
+    setCommentLikes(prev => ({
+      ...prev,
+      [commentId]: newLikedState
+    }));
+    
+    // Context를 통해 댓글 좋아요 수 업데이트
+    toggleCommentLike(commentId, newLikedState);
+  };
+
+  // 날짜 포매팅 함수
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '날짜 없음';
+    try {
+      return new Date(dateStr).toLocaleDateString();
+    } catch (error) {
+      return '날짜 형식 오류';
+    }
   };
 
   return (
@@ -37,26 +69,36 @@ export default function FreePostDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* 뒤로가기 버튼 */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity 
+            onPress={() => router.back()} 
+            style={styles.backButton}
+          >
             <AntDesign name="arrowleft" size={24} color="#333" />
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>자유 글 목록</Text>
         </View>
         
         {/* 게시글 내용 */}
         <View style={styles.card}>
           <Text style={styles.title}>{post.title}</Text>
-          <Text style={styles.date}>{post.date || '날짜 없음'}</Text>
+          <Text style={styles.date}>{post.date ? formatDate(post.date) : '날짜 없음'}</Text>
           <View style={styles.divider} />
           <Text style={styles.content}>{post.content}</Text>
           
-          {/* 좋아요 & 댓글 카운트 */}
+          {/* 좋아요 & 댓글 카운트 - 좋아요 색상 조건부 변경 */}
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.iconRow} onPress={handleLike}>
-              <AntDesign name="like1" size={18} color="#1976d2" />
-              <Text style={styles.count}>{post.likes}</Text>
+              <AntDesign 
+                name={postLiked ? "heart" : "hearto"} // 활성화 시 채워진 하트, 비활성화 시 빈 하트
+                size={18} 
+                color="#e53935" // 항상 빨간색
+              />
+              <Text style={styles.count}>
+                {post.likes}
+              </Text>
             </TouchableOpacity>
             <View style={styles.iconRow}>
-              <AntDesign name="message1" size={18} color="#888" />
+              <AntDesign name="message1" size={18} color="#3f51b5" />
               <Text style={styles.count}>{post.comments}</Text>
             </View>
           </View>
@@ -99,7 +141,7 @@ export default function FreePostDetailScreen() {
               <View style={styles.commentAuthorRow}>
                 <Text style={styles.commentAuthor}>{comment.author}</Text>
                 <Text style={styles.commentDate}>
-                  {new Date(comment.createdAt).toLocaleDateString()}
+                  {formatDate(comment.createdAt)}
                 </Text>
               </View>
               <Text style={styles.commentContent}>{comment.content}</Text>
@@ -108,7 +150,11 @@ export default function FreePostDetailScreen() {
                   style={styles.commentIconRow}
                   onPress={() => handleCommentLike(comment.id)}
                 >
-                  <AntDesign name="like1" size={14} color={comment.likes > 0 ? "#1976d2" : "#888"} />
+                  <AntDesign 
+                    name={commentLikes[comment.id] ? "heart" : "hearto"} // 활성화 시 채워진 하트, 비활성화 시 빈 하트
+                    size={14} 
+                    color="#e53935" // 항상 빨간색
+                  />
                   <Text style={styles.commentCount}>{comment.likes}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -142,6 +188,12 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 5,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginLeft: 10,
   },
   card: {
     backgroundColor: '#fff',
@@ -190,8 +242,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
   },
-  
-  // 게시글 수정 버튼 - 새로 추가
+  likeCount: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: '#e53935',
+  },
   editPostButton: {
     alignSelf: 'flex-start',
     backgroundColor: '#f0f7ff',
@@ -207,8 +262,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 13,
   },
-  
-  // 댓글 헤더
   commentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -230,8 +283,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1976d2',
   },
-  
-  // 댓글 아이템
   commentItem: {
     marginBottom: 15,
     paddingBottom: 15,
@@ -272,6 +323,11 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 12,
     color: '#666',
+  },
+  commentLikeCount: {
+    marginLeft: 4,
+    fontSize: 12,
+    color: '#e53935',
   },
   editCommentText: {
     fontSize: 13,

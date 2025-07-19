@@ -1,3 +1,4 @@
+import { AntDesign } from '@expo/vector-icons'; // AntDesign 아이콘 추가
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 
 // 댓글 타입 정의
@@ -55,6 +56,8 @@ interface PostContextType {
   updateComment: (commentId: string, content: string) => void;
   deleteComment: (commentId: string) => void;
   likeComment: (commentId: string) => void;
+  togglePostLike: (id: string, liked: boolean) => void;
+  toggleCommentLike: (commentId: string, liked: boolean) => void;
 }
 
 // Context 생성
@@ -171,6 +174,34 @@ export function PostProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  // 게시글 좋아요 토글
+  const togglePostLike = (id: string, liked: boolean) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => {
+        if (post.id === id) {
+          // 좋아요를 누르면 +1, 취소하면 -1
+          const delta = liked ? 1 : -1;
+          return { ...post, likes: Math.max(0, post.likes + delta) };
+        }
+        return post;
+      })
+    );
+  };
+  
+  // 댓글 좋아요 토글
+  const toggleCommentLike = (commentId: string, liked: boolean) => {
+    setComments((prevComments) =>
+      prevComments.map((comment) => {
+        if (comment.id === commentId) {
+          // 좋아요를 누르면 +1, 취소하면 -1
+          const delta = liked ? 1 : -1;
+          return { ...comment, likes: Math.max(0, comment.likes + delta) };
+        }
+        return comment;
+      })
+    );
+  };
+  
   return (
     <PostContext.Provider
       value={{
@@ -187,7 +218,9 @@ export function PostProvider({ children }: { children: ReactNode }) {
         getCommentById,
         updateComment,
         deleteComment,
-        likeComment
+        likeComment,
+        togglePostLike,
+        toggleCommentLike,
       }}
     >
       {children}
@@ -203,3 +236,4 @@ export function usePostContext() {
   }
   return context;
 }
+
