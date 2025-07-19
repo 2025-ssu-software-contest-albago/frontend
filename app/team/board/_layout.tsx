@@ -13,7 +13,7 @@ export default function BoardLayout() {
   const router = useRouter(); // 뒤로가기 라우터
   // 테마 컨텍스트를 사용하지 않으므로 고정된 색상 사용
   const FIXED_TAB_COLORS = {
-    activeTint: '#77B6FF', // 활성화된 탭 색상 (파란색) - 텍스트 색상으로 사용
+    activeTint: '#3689FF', // 활성화된 탭 색상 (파란색) - 텍스트 색상으로 사용
     inactiveTint: '#666',  // 비활성화된 탭 색상 (회색) - 텍스트 색상으로 사용
     background: 'transparent', // <-- 탭 바 배경색을 투명으로 변경
     borderColor: 'transparent', // <-- 탭 바 경계선 색상을 투명으로 변경
@@ -47,7 +47,6 @@ export default function BoardLayout() {
       {/* 탑바 */}
       <TopTabs
         screenOptions={{
-          headerShown: false, // 헤더 영역 완전 제거
           tabBarActiveTintColor: FIXED_TAB_COLORS.activeTint, // 활성화된 탭 아이콘/텍스트 색상
           tabBarInactiveTintColor: FIXED_TAB_COLORS.inactiveTint, // 비활성화된 탭 아이콘/텍스트 색상
           tabBarIndicatorStyle: { // 활성화된 탭 아래의 인디케이터 스타일

@@ -38,7 +38,7 @@ export default function NoticeBoardScreen() {
     postDateText: '#888',
     shadowColor: '#000',
     tint: '#FF0000', // 핀 아이콘 색상
-    fabBackground: '#77B6FF',
+    fabBackground: '#3689FF',
     fabIconColor: '#fff',
   };
 

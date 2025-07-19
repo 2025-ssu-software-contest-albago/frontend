@@ -31,7 +31,7 @@ export default function SuggestionBoardScreen() {
     postTitleText: '#333',
     postDateText: '#888',
     shadowColor: '#000',
-    fabBackground: '#77B6FF',
+    fabBackground: '#3689FF',
     fabIconColor: '#fff',
   };
 
@@ -78,7 +78,7 @@ export default function SuggestionBoardScreen() {
           {/* 카드 내부 오른쪽 세로 중앙에 수정/삭제 아이콘 */}
           <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
             <TouchableOpacity onPress={(e) => { e.stopPropagation(); alert('수정 기능은 준비 중입니다.'); }} style={{ padding: 4 }}>
-              <AntDesign name="edit" size={18} color="#1976d2" />
+              <AntDesign name="edit" size={18} color="#666" />
             </TouchableOpacity>
             <TouchableOpacity onPress={(e) => { e.stopPropagation(); alert('삭제 기능은 준비 중입니다.'); }} style={{ padding: 4, marginLeft: 2 }}>
               <AntDesign name="delete" size={18} color="#e53935" />
