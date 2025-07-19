@@ -10,6 +10,7 @@ import {
 import PagerView from 'react-native-pager-view';
 import { addWeeks, startOfWeek, format, addDays, parseISO } from 'date-fns';
 import { useUserStore } from '@/scripts/store/userStore';
+import { scheduleColors } from '@/scripts/color/scheduleColor';
 
 const { height } = Dimensions.get('window');
 const WEEK_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -78,11 +79,17 @@ export default function PersonalWeek() {
                       key={i}
                       style={[
                         styles.scheduleBlockStacked,
-                        { backgroundColor: s.color || '#ccc' },
+                        { backgroundColor: scheduleColors[s.color].background || '#ccc' },
                       ]}
                     >
-                      <Text style={styles.scheduleText}>{s.name}</Text>
-                      <Text style={styles.scheduleTimeText}>
+                      <Text style={[
+                        styles.scheduleText,
+                        { color: scheduleColors[s.color].font }
+                      ]}>{s.name}</Text>
+                      <Text style={[
+                        styles.scheduleTimeText,
+                        { color: scheduleColors[s.color].font }
+                      ]}>
                         {format(parseISO(s.startTime), 'HH:mm')} - {format(parseISO(s.endTime), 'HH:mm')}
                       </Text>
                     </View>
@@ -201,11 +208,6 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 2,
   },
   scheduleText: {
     fontSize: 11,

@@ -7,6 +7,7 @@ import { ko } from 'date-fns/locale'; // <--- 한글 locale 임포트
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserStore } from '@/scripts/store/userStore';
+import { scheduleColors } from '@/scripts/color/scheduleColor';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -88,7 +89,7 @@ const PersonalScheduleDetail: React.FC = () => {
             </View>
 
             <View style={styles.workplaceSection}>
-                <View style={[styles.workplaceColorBar, { backgroundColor: schedule.color || '#ccc' }]} />
+                <View style={[styles.workplaceColorBar, { backgroundColor: scheduleColors[schedule.color]?.main || '#ccc' }]} />
                 <Text style={styles.workplaceName}>{schedule.name || '알 수 없는 근무지'}</Text>
             </View>
 

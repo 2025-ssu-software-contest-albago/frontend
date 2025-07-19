@@ -10,6 +10,7 @@ import {
 import PagerView from 'react-native-pager-view';
 import { addWeeks, startOfWeek, format, addDays, parseISO } from 'date-fns';
 import { useUserStore } from '@/scripts/store/userStore';
+import { scheduleColors } from '@/scripts/color/scheduleColor';
 
 const { height } = Dimensions.get('window');
 const WEEK_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -118,10 +119,13 @@ export default function PersonalWeek() {
                         key={i}
                         style={[
                           styles.scheduleBlock,
-                          { top, height, backgroundColor: s.color || '#ccc' },
+                          { top, height, backgroundColor: scheduleColors[s.color].background || '#ccc' },
                         ]}
                       >
-                        <Text style={styles.scheduleText}>{s.name}</Text>
+                        <Text style={[
+                            styles.scheduleText,
+                            { color: scheduleColors[s.color].font }
+                          ]}>{s.name}</Text>
                       </View>
                     );
                   })}

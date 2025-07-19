@@ -16,7 +16,7 @@ export const useMemoStore = create((set, get) => ({
 
         if (!selectedSpaceId) return null;
 
-        const currentSpace = memo.spaces.find(space => space.id === selectedSpaceId);
+        const currentSpace = memo.spaces.find(space => space.spaceId === selectedSpaceId);
         if (!currentSpace) return null;
 
         // tabId 로 먼저 찾기

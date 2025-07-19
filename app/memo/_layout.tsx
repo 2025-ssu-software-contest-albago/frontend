@@ -15,6 +15,12 @@ export default function MemoLayout() {
                 options={{
                     headerShown: false,
                 }}
+            />            
+            <Stack.Screen
+                name="editMemo"
+                options={{
+                    headerShown: false,
+                }}
             />
             <Stack.Screen
                 name="addMemo"

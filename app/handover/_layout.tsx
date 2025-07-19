@@ -22,6 +22,12 @@ export default function DetailStackLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="editHandover"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

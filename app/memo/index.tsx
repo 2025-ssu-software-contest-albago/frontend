@@ -33,7 +33,7 @@ export default function MemoList() {
         );
     }
 
-    const currentSpace = memo.spaces.find(space => space.id === selectedSpaceId);
+    const currentSpace = memo.spaces.find(space => space.spaceId === selectedSpaceId);
     const notes = currentSpace ? currentSpace.notes : [];
 
     const filteredNotes = notes.filter(note =>
