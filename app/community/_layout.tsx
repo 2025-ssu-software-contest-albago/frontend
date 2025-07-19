@@ -1,6 +1,7 @@
 import { Slot, usePathname, useRouter } from 'expo-router';
 import React from 'react';
 import { LogBox, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import CommunityHeader from '../components/CommunityHeader';
 import { PostProvider } from './contexts/PostContext';
 
 // 특정 경고 무시 - 임시 해결책
@@ -28,6 +29,7 @@ export default function CommunityLayout() {
   return (
     <PostProvider>
       <View style={styles.container}>
+        <CommunityHeader />
         {/* 커스텀 탭 헤더 - 직접 구현 */}
         <View style={styles.tabHeader}>
           <TouchableOpacity 

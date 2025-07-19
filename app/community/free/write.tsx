@@ -2,6 +2,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import CommunityHeader from '../../components/CommunityHeader';
 
 export default function WritePostScreen() {
   const router = useRouter();
@@ -25,45 +26,48 @@ export default function WritePostScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* 헤더 */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <AntDesign name="close" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>새 게시글</Text>
-        <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
-          <Text style={styles.submitText}>등록</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
+      <CommunityHeader title="새 게시글" />
+      <View style={styles.container}>
+        {/* 헤더 */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <AntDesign name="close" size={24} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>새 게시글</Text>
+          <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+            <Text style={styles.submitText}>등록</Text>
+          </TouchableOpacity>
+        </View>
 
-      <ScrollView style={styles.formContainer}>
-        {/* 제목 입력 */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.titleInput}
-            placeholder="제목을 입력하세요"
-            value={title}
-            onChangeText={setTitle}
-            maxLength={50}
-          />
-        </View>
-        
-        {/* 구분선 */}
-        <View style={styles.divider} />
-        
-        {/* 내용 입력 */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.contentInput}
-            placeholder="내용을 입력하세요"
-            value={content}
-            onChangeText={setContent}
-            multiline
-            textAlignVertical="top"
-          />
-        </View>
-      </ScrollView>
+        <ScrollView style={styles.formContainer}>
+          {/* 제목 입력 */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.titleInput}
+              placeholder="제목을 입력하세요"
+              value={title}
+              onChangeText={setTitle}
+              maxLength={50}
+            />
+          </View>
+          
+          {/* 구분선 */}
+          <View style={styles.divider} />
+          
+          {/* 내용 입력 */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.contentInput}
+              placeholder="내용을 입력하세요"
+              value={content}
+              onChangeText={setContent}
+              multiline
+              textAlignVertical="top"
+            />
+          </View>
+        </ScrollView>
+      </View>
     </View>
   );
 }

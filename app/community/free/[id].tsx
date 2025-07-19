@@ -2,6 +2,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import CommunityHeader from '../../components/CommunityHeader';
 import { usePostContext } from '../contexts/PostContext';
 
 export default function FreePostDetailScreen() {
@@ -65,7 +66,8 @@ export default function FreePostDetailScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
+      <CommunityHeader />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* 뒤로가기 버튼 */}
         <View style={styles.header}>

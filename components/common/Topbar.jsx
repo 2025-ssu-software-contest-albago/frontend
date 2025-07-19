@@ -52,9 +52,6 @@ export default function TopBar() {
 
             {/* 오른쪽 아이콘 */}
             <View style={styles.rightSection}>
-                <Pressable onPress={() => router.push('/community')}>
-                    <Ionicons name="chatbubble-ellipses-outline" size={22} color="#333" style={{ marginRight: 14 }} />
-                </Pressable>
                 <Pressable onPress={() => router.push('/notification')}>
                     <Feather name="bell" size={20} color="#333" style={styles.icon} />
                 </Pressable>

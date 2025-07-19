@@ -12,7 +12,6 @@ import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { Platform } from 'react-native';
 import Modal from 'react-native-modal';
-import { se } from 'date-fns/locale';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -104,7 +103,17 @@ export default function CalendarPager() {
                 }}>
                   <View style={styles.menuItem}><Feather name="edit-2" size={24} color="#333" /><Text style={styles.menuText}>개인 메모</Text></View>
                 </TouchableOpacity>
-                <View style={styles.menuItem}><Feather name="message-square" size={24} color="#333" /><Text style={styles.menuText}>자유게시판</Text></View>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.push('/community');
+                    setMenuModalVisible(false); // 모달 닫기
+                  }}
+                >
+                  <View style={styles.menuItem}>
+                    <Feather name="message-square" size={24} color="#333" />
+                    <Text style={styles.menuText}>자유게시판</Text>
+                  </View>
+                </TouchableOpacity>
               </View>
             </Modal>
             {/* 팀원 정보 모달 */}
@@ -294,5 +303,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginLeft: 'auto',
     alignItems: 'center',
+  },
+  // CommunityHeader 관련 스타일 추가
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 50, // 상태바 높이 고려
+    paddingBottom: 18,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    zIndex: 10,
+  },
+  backButton: {
+    marginRight: 10,
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#222',
+    flex: 1,
+    textAlign: 'center',
+    color: '#222',
   },
 });
