@@ -3,6 +3,7 @@ export const userData = {
   "email": "chun4582@naver.com",
   "name": "천재민",
   "phone": "010-1234-5678",
+  "adress": "미사강변서로 111-111",
   "spaces": [
     {
       "id": "personalSpace_id1",

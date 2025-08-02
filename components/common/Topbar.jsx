@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import {
     View,
@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Zustand 전역변수 관리
 import { useUserStore } from '@/scripts/store/userStore';
+import { shallow } from 'zustand/shallow';
 import { set } from 'date-fns';
 
 export default function TopBar() {
@@ -25,6 +26,7 @@ export default function TopBar() {
     const user = useUserStore((state) => state.user);
     const selectedSpaceId = useUserStore((state) => state.selected_space);
     const setSelectedSpace = useUserStore((state) => state.setSelectedSpace);
+
     return (
         <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
             {/* 왼쪽 영역 */}

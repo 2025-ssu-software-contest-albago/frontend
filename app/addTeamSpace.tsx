@@ -8,31 +8,101 @@ import {
   StyleSheet,
   SafeAreaView,
   Platform,
-  Keyboard, // <--- Keyboard 모듈 import
-  TouchableWithoutFeedback, // <--- TouchableWithoutFeedback import
+  Keyboard,
+  TouchableWithoutFeedback,
+  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { userList } from '../scripts/dummyData/userList';
+import { useUserStore } from '@/scripts/store/userStore'; // 경로에 맞게 조정
 
 export default function AddTeamSpace() {
   const [teamName, setTeamName] = useState('');
   const [members, setMembers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { user, setUser } = useUserStore();
 
   const router = useRouter();
 
-  const handleAddMember = () => {
-    console.log('멤버 추가 버튼 클릭');
+  const handleCreateTeamSpace = () => {
+    if (!teamName.trim()) return;
+
+    const now = new Date().toISOString();
+    const teamSpaceId = `teamSpace_${Date.now()}`;
+
+    const defaultMemberProps = {
+      hourlyWage: 10000,
+      weeklyAllowance: false,
+      nightAllowance: false,
+      nightRate: 150,
+      overtimeAllowance: false,
+      overtimeRate: 150,
+      holidayAllowance: false,
+      holidayRate: 150,
+      deductions: "4대 보험"
+    };
+
+    const newTeamSpace = {
+      id: teamSpaceId,
+      type: "team",
+      name: teamName.trim(),
+      imageUrl: null,
+      lastUpdatedAt: now,
+      members: [
+        {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: "admin",
+          color: "lime",
+          ...defaultMemberProps
+        },
+        ...members.map((m, i) => ({
+          id: m.id,
+          name: m.name,
+          email: m.email,
+          phone: m.phone || "",
+          role: "member",
+          color: i % 2 === 0 ? "mint" : "emerald", // 예시 색상 배정
+          ...defaultMemberProps
+        }))
+      ],
+      schedules: [] // 새 팀 생성 시 스케줄은 비어 있음
+    };
+
+    const updatedUserData = {
+      ...user,
+      spaces: [...user.spaces, newTeamSpace]
+    };
+
+    setUser(updatedUserData);
+    console.log("✅ 팀 공간 생성됨:", newTeamSpace);
+    console.log("📦 userStore 상태:", useUserStore.getState().user);
+    router.push("/team"); // 이동 경로는 원하는 화면으로 변경
   };
 
-  const handleCreateTeamSpace = () => {
-    console.log('팀 공간 생성하기 버튼 클릭');
-    console.log('팀 이름:', teamName);
-    console.log('추가된 멤버:', members);
-    // 실제 팀 생성 API 호출 로직
+  const handleSelectUser = (user) => {
+    if (!members.find((m) => m.id === user.id)) {
+      setMembers((prev) => [...prev, user]);
+      setSearchQuery('');
+      Keyboard.dismiss();
+    }
   };
+
+  const filteredUsers =
+    searchQuery.trim().length < 2
+      ? []
+      : userList.filter((user) => {
+        const keyword = searchQuery.trim().toLowerCase();
+        const email = user.email.toLowerCase();
+
+        return email.startsWith(keyword) || email.includes(keyword);
+      });
+
+
 
   return (
-    // SafeAreaView를 TouchableWithoutFeedback으로 감쌉니다.
-    // accessible={false}는 시각 장애인용 스크린 리더가 이 터치를 무시하게 하여 접근성을 유지합니다.
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
@@ -44,7 +114,7 @@ export default function AddTeamSpace() {
         </View>
 
         <View style={styles.container}>
-          {/* 팀 이름 입력 섹션 */}
+          {/* 팀 이름 입력 */}
           <View style={styles.inputSection}>
             <Text style={styles.label}>
               팀 이름 <Text style={styles.requiredIndicator}>*</Text>
@@ -54,39 +124,75 @@ export default function AddTeamSpace() {
               placeholder="팀 이름을 입력해주세요"
               value={teamName}
               onChangeText={setTeamName}
-              // 키보드에서 'Done' 또는 '확인' 버튼을 눌렀을 때도 키보드를 숨기려면 추가
               onSubmitEditing={Keyboard.dismiss}
-              returnKeyType="done" // 키보드 버튼 텍스트 설정
+              returnKeyType="done"
             />
           </View>
 
-          {/* 추가할 멤버 섹션 */}
+          {/* 팀원 추가하기 */}
+          <View style={styles.inputSection}>
+            <Text style={styles.label}>팀원 추가하기</Text>
+
+            <View style={styles.searchBox}>
+              <Ionicons name="search" size={18} color="#999" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="이메일로 검색하세요"
+                placeholderTextColor="#aaa"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+
+            {searchQuery.length > 0 && (
+              <FlatList
+                data={filteredUsers}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={styles.searchResultItem}>
+                    <View>
+                      <Text style={styles.userEmail}>{item.email}</Text>
+                      <Text style={styles.userName}>{item.name}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.addButton}
+                      onPress={() => handleSelectUser(item)}
+                    >
+                      <Text style={styles.addButtonText}>추가</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                style={styles.searchResultList}
+              />
+            )}
+          </View>
+
+          {/* 추가된 팀원 */}
           <View style={styles.inputSection}>
             <View style={styles.memberLabelContainer}>
-              <Text style={styles.label}>추가할 멤버</Text>
+              <Text style={styles.label}>추가된 팀원</Text>
               <TouchableOpacity>
                 <Ionicons name="help-circle-outline" size={16} color="#B0B0B0" />
               </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              style={styles.addMemberButton}
-              onPress={handleAddMember}
-            >
-              <Ionicons name="add" size={20} color="#757575" />
-              <Text style={styles.addMemberButtonText}>멤버 추가하기</Text>
-            </TouchableOpacity>
-            {members.length > 0 && (
-              <View style={styles.membersList}>
-                {members.map((member, index) => (
-                  <Text key={index} style={styles.memberItem}>
-                    {member}
-                  </Text>
+
+            {members.length > 0 ? (
+              <View style={styles.cardContainer}>
+                {members.map((member) => (
+                  <View key={member.id} style={styles.memberCard}>
+                    <Text style={styles.memberName}>{member.name}</Text>
+                    <Text style={styles.memberEmail}>{member.email}</Text>
+                  </View>
                 ))}
               </View>
+            ) : (
+              <Text style={{ color: '#999' }}>추가된 팀원이 없습니다.</Text>
             )}
           </View>
 
-          {/* 팀 공간 생성하기 버튼 */}
+          {/* 하단 버튼 */}
           <View style={styles.bottomButtonContainer}>
             <TouchableOpacity
               style={styles.createButton}
@@ -153,32 +259,95 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333333',
   },
+  searchBox: {
+    marginTop: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F3F4',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#333',
+    paddingVertical: 0,
+  },
+  searchResultList: {
+    marginTop: 8,
+    maxHeight: 180,
+  },
+  searchResultItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: '#FAFAFA',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEE',
+  },
+  userEmail: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  userName: {
+    fontSize: 13,
+    color: '#777',
+    marginTop: 2,
+  },
+  addButton: {
+    backgroundColor: '#4285F4',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  addButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   memberLabelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
-  addMemberButton: {
+  cardContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F7F7F7',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
   },
-  addMemberButtonText: {
-    fontSize: 16,
-    color: '#757575',
-    marginLeft: 8,
+  memberCard: {
+    width: '48%',
+    backgroundColor: '#ffffff',
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  membersList: {
-    marginTop: 10,
-  },
-  memberItem: {
-    fontSize: 14,
-    color: '#555555',
+  memberName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#222',
     marginBottom: 4,
+  },
+  memberEmail: {
+    fontSize: 13,
+    color: '#666',
   },
   bottomButtonContainer: {
     flex: 1,
