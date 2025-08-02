@@ -6,11 +6,14 @@ import {
   Dimensions,
   ScrollView,
   InteractionManager,
+  Pressable,
 } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import { addWeeks, startOfWeek, format, addDays, parseISO } from 'date-fns';
+import { addWeeks, startOfWeek, format, addDays, parseISO, isSameDay } from 'date-fns';
 import { useUserStore } from '@/scripts/store/userStore';
 import { scheduleColors } from '@/scripts/color/scheduleColor';
+import DailyScheduleModalContent from './DailyScheduleModal'; // ✅ 경로 확인
+import Modal from 'react-native-modal'; // ✅ 모달 라이브러리
 
 const { height } = Dimensions.get('window');
 const WEEK_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -22,7 +25,10 @@ export default function PersonalWeek() {
   const user = useUserStore((state) => state.user);
   const selected_space = useUserStore((state) => state.selected_space);
 
-  // 더블버퍼링 overlay
+  const [showModal, setShowModal] = useState(false); // ✅ 모달 상태
+  const [selectedDate, setSelectedDate] = useState(null); // ✅ 선택된 날짜
+  const [modalSchedules, setModalSchedules] = useState([]); // ✅ 선택된 날짜의 스케줄
+
   const [showCover, setShowCover] = useState(false);
   const [coverDate, setCoverDate] = useState(null);
 
@@ -31,11 +37,17 @@ export default function PersonalWeek() {
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   };
 
+  const openModalForDate = (date, scheduleMap) => {
+    const dateKey = format(date, 'yyyy-MM-dd');
+    setSelectedDate(date);
+    setModalSchedules(scheduleMap[dateKey] || []);
+    setShowModal(true);
+  };
+
   const renderWeek = (targetDate) => {
     const weekDates = getCurrentWeek(targetDate);
     const schedules = user?.spaces?.[selected_space]?.schedules || [];
 
-    // 날짜별 스케줄 그룹화 및 정렬
     const scheduleMap = schedules.reduce((acc, s) => {
       const localStart = parseISO(s.startTime);
       const dateKey = format(localStart, 'yyyy-MM-dd');
@@ -73,28 +85,32 @@ export default function PersonalWeek() {
               const dateKey = format(date, 'yyyy-MM-dd');
               const daySchedules = scheduleMap[dateKey] || [];
               return (
-                <View key={idx} style={styles.dayColumn}>
+                <Pressable
+                  key={idx}
+                  style={styles.dayColumn}
+                  onPress={() => openModalForDate(date, scheduleMap)} // ✅ 날짜 클릭 시 모달 열기
+                >
                   {daySchedules.map((s, i) => (
                     <View
                       key={i}
                       style={[
                         styles.scheduleBlockStacked,
-                        { backgroundColor: scheduleColors[s.color].background || '#ccc' },
+                        { backgroundColor: scheduleColors[s.color]?.background || '#ccc' },
                       ]}
                     >
                       <Text style={[
                         styles.scheduleText,
-                        { color: scheduleColors[s.color].font }
+                        { color: scheduleColors[s.color]?.font || '#fff' }
                       ]}>{s.name}</Text>
                       <Text style={[
                         styles.scheduleTimeText,
-                        { color: scheduleColors[s.color].font }
+                        { color: scheduleColors[s.color]?.font || '#fff' }
                       ]}>
                         {format(parseISO(s.startTime), 'HH:mm')} - {format(parseISO(s.endTime), 'HH:mm')}
                       </Text>
                     </View>
                   ))}
-                </View>
+                </Pressable>
               );
             })}
           </View>
@@ -119,7 +135,6 @@ export default function PersonalWeek() {
       setScrollEnabled(false);
       const newBase = addWeeks(baseDate, offset);
 
-      // 더블버퍼링 snapshot
       setCoverDate(newBase);
       setShowCover(true);
 
@@ -154,6 +169,25 @@ export default function PersonalWeek() {
           {renderWeek(coverDate)}
         </View>
       )}
+
+      {/* ✅ 모달: 하단 슬라이드 + 배경 어둡게 + 클릭 시 닫힘 */}
+      <Modal
+        isVisible={showModal}
+        onBackdropPress={() => setShowModal(false)}
+        onBackButtonPress={() => setShowModal(false)}
+        style={{ justifyContent: 'flex-end', margin: 0 }}
+        backdropOpacity={0.5}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        useNativeDriver
+      >
+        <DailyScheduleModalContent
+          selectedDate={selectedDate}
+          dailySchedules={modalSchedules}
+          onAddSchedule={() => setShowModal(false)}
+          onClose={() => setShowModal(false)}
+        />
+      </Modal>
     </View>
   );
 }

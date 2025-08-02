@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import { Ionicons } from '@expo/vector-icons';
 import WeekPage from '@/components/personal/weekPage';
 import { is } from 'date-fns/locale';
+import { scheduleColors } from '@/scripts/color/scheduleColor';
 
 export default function WeekEdit() {
     const pagerRef = useRef(null);
@@ -235,7 +236,7 @@ export default function WeekEdit() {
                             <View style={{
                                 width: 6,
                                 height: '100%',
-                                backgroundColor: space.color,
+                                backgroundColor: scheduleColors[space.color].main,
                                 borderTopLeftRadius: 4,
                                 borderBottomLeftRadius: 4,
                                 borderTopRightRadius: 4,

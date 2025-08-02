@@ -13,6 +13,8 @@ import { useRouter } from 'expo-router';
 import { Platform } from 'react-native';
 import Modal from 'react-native-modal';
 import { se } from 'date-fns/locale';
+import { scheduleColors } from '@/scripts/color/scheduleColor';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -96,7 +98,7 @@ export default function CalendarPager() {
                   router.push(`/handover`);
                   setMenuModalVisible(false);
                 }}>
-                  <View style={styles.menuItem}><Feather name="repeat" size={24} color="#333" /><Text style={styles.menuText}>인수인계</Text></View>
+                  <View style={styles.menuItem}><FontAwesome6 name="handshake" size={24} color="black" /><Text style={styles.menuText}>인수인계</Text></View>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => {
                   router.push(`/memo`);
@@ -120,7 +122,7 @@ export default function CalendarPager() {
                 <Text style={styles.teamInfoHeader}>팀원 정보</Text>
                 {user?.spaces?.find((s: any) => s.type === 'team')?.members?.map((member: any, idx: number) => (
                   <View key={member.id} style={styles.teamMemberRow}>
-                    <View style={[styles.colorBar, { backgroundColor: member.color || '#ccc' }]} />
+                    <View style={[styles.colorBar, { backgroundColor: scheduleColors[member.color].main || '#ccc' }]} />
                     <Text style={styles.memberName}>{member.name}</Text>
                     {member.role === "admin" && <Text style={styles.managerLabel}>관리자</Text>}
                     <View style={styles.memberIcons}>
@@ -273,7 +275,7 @@ const styles = StyleSheet.create({
   colorBar: {
     width: 6,
     height: 24, // 기존 32 → 24로 줄임
-    borderRadius: 3,
+    borderRadius: 20,
     marginRight: 8, // 기존 10 → 8로 줄임
   },
   memberName: {
@@ -281,8 +283,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#222',
     marginRight: 8,
+    paddingBottom: 3,
     // minWidth: 70,
-    // lineHeight: 24, // 추가: colorBar와 높이 맞춤
   },
   managerLabel: {
     color: '#3CB371',

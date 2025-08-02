@@ -138,7 +138,7 @@ export default function TeamUserDetailEdit() {
                     <View style={styles.row}>
                         <Text style={styles.label}>색상</Text>
                         <TouchableOpacity onPress={() => setColorModalVisible(true)} style={styles.colorBox}>
-                            <View style={[styles.colorDot, { backgroundColor: color }]} />
+                            <View style={[styles.colorDot, { backgroundColor: scheduleColors[color].main }]} />
                             <Feather name="chevron-down" size={18} color="#555" />
                         </TouchableOpacity>
                     </View>

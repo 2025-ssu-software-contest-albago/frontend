@@ -37,7 +37,7 @@ export default function AddTeamSpace() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="black" />
+            <Ionicons name="chevron-back" size={28} color="#333" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>팀 공간 생성</Text>
           <View style={styles.placeholder} />
@@ -118,7 +118,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F0F0F0',
   },
   backButton: {
-    padding: 5,
   },
   headerTitle: {
     fontSize: 18,

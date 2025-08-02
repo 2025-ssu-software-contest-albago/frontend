@@ -7,6 +7,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const TIME_LABEL_WIDTH = 20;
 const HORIZONTAL_PADDING = 20;
 const CELL_WIDTH = (SCREEN_WIDTH - TIME_LABEL_WIDTH - HORIZONTAL_PADDING) / 7;
+const CELL_HEIGHT = 50;
 
 const WeekPage = React.memo(({ baseDate, offset, selectedSpace, setSpaceModalVisible, hours, displayDate, selectedCells, onCellToggle }) => {
   const [weekDates, setWeekDates] = useState([]);
@@ -50,6 +51,7 @@ const WeekPage = React.memo(({ baseDate, offset, selectedSpace, setSpaceModalVis
             CELL_WIDTH={CELL_WIDTH}
             selectedCells={selectedCells}
             onCellToggle={onCellToggle}
+            CELL_HEIGHT = {CELL_HEIGHT}
           />
         </View>
       </ScrollView>
@@ -70,7 +72,7 @@ const styles = StyleSheet.create({
   dateText: { fontSize: 12, color: '#666' },
   scheduleGrid: { paddingHorizontal: 10, paddingBottom: 30 },
   timeLabel: {
-    height: 30,
+    height: CELL_HEIGHT,
     textAlign: 'center',
     fontSize: 12,
     color: '#555',

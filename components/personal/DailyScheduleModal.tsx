@@ -147,11 +147,11 @@ const modalStyles = StyleSheet.create({
         borderRadius: 8,
         padding: 10,
         backgroundColor: '#fff', // 클릭 가능한 영역을 명확히 하기 위해 배경색 추가
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 1,
+        // shadowColor: '#000',
+        // shadowOffset: { width: 0, height: 1 },
+        // shadowOpacity: 0.05,
+        // shadowRadius: 2,
+        // elevation: 1,
     },
     scheduleColorBar: {
         width: 6,

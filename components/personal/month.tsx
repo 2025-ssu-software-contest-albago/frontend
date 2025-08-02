@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions, InteractionManager, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, InteractionManager, Pressable, TouchableOpacity } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import {
     format,
@@ -7,6 +7,8 @@ import {
     endOfMonth,
     eachDayOfInterval,
     addMonths,
+    isSameMonth,
+    isSameDay
 } from 'date-fns';
 
 import { useUserStore } from '@/scripts/store/userStore';
@@ -15,6 +17,7 @@ import { userData } from '@/scripts/dummyData/userData';
 import DailyScheduleModalContent from './DailyScheduleModal';
 import Modal from 'react-native-modal';
 import { scheduleColors } from '@/scripts/color/scheduleColor';
+import Feather from '@expo/vector-icons/Feather';
 
 const MonthCalendarView = React.memo(({
     targetMonth,
@@ -24,7 +27,8 @@ const MonthCalendarView = React.memo(({
     WEEK_DAYS,
     currentMonthNumRows,
     styles,
-    onDatePress
+    onDatePress,
+    onTodayPress
 }) => {
     const getMonthDays = (date) => {
         const start = startOfMonth(date);
@@ -53,19 +57,39 @@ const MonthCalendarView = React.memo(({
 
     const monthDays = getMonthDays(targetMonth);
 
+
     return (
         <View style={styles.monthContainer}>
             <View style={styles.headerRow}>
                 <Text style={styles.monthText}>{format(targetMonth, 'yyyy년 M월')}</Text>
-                <Text style={styles.todayBtn}>Today ➤</Text>
+                {!isSameMonth(targetMonth, new Date()) && (
+                    <TouchableOpacity
+                        onPress={onTodayPress}
+                        activeOpacity={0.6} // 눌렀을 때 투명도 조절 (기본은 0.2~0.3)
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                        <Text style={styles.todayBtn}>Today</Text>
+                        <Feather name="rotate-ccw" size={16} color="#007AFF" style={{ marginLeft: 4 }} />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <View style={styles.weekRow}>
-                {WEEK_DAYS.map((day) => (
-                    <Text key={day} style={[styles.weekday, { width: calendarWidth / 7 }]}>
-                        {day}
-                    </Text>
-                ))}
+                {WEEK_DAYS.map((day, index) => {
+                    const isWeekend = index === 0 || index === 6; // 일요일(index 0) 또는 토요일(index 6)
+                    return (
+                        <Text
+                            key={day}
+                            style={[
+                                styles.weekday,
+                                { width: calendarWidth / 7 },
+                                isWeekend && { color: '#fc3c3cff' }, // 빨간색
+                            ]}
+                        >
+                            {day}
+                        </Text>
+                    );
+                })}
             </View>
 
             <View style={[styles.dateGrid, { flex: 1 }]}>
@@ -76,6 +100,7 @@ const MonthCalendarView = React.memo(({
                             const date = monthDays[dateIndex];
                             const dateKey = date ? format(date, 'yyyy-MM-dd') : null;
                             const daySchedules = dateKey ? monthSchedulesMap[dateKey] || [] : [];
+                            const isToday = date && isSameDay(date, new Date());
 
                             return (
                                 <Pressable
@@ -86,9 +111,35 @@ const MonthCalendarView = React.memo(({
                                     ]}
                                     onPress={() => date && onDatePress(date, daySchedules)}
                                 >
-                                    {date && (
+                                    {date && ( //각 날짜를 표현하는 구역 
                                         <>
-                                            <Text style={{ fontWeight: 'bold', minHeight: 20 }}>{date.getDate()}</Text>
+                                            <View
+                                                style={{
+                                                    width: 28,
+                                                    height: 28,
+                                                    borderRadius: 14,
+                                                    overflow: 'hidden', // ✅ 강제 클리핑
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                    backgroundColor: isToday ? '#007AFF' : 'transparent', // 현재날짜에 동그라미
+                                                }}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        fontWeight: 'bold',
+                                                        textAlign: 'center',
+                                                        color: isToday
+                                                            ? 'white'
+                                                            : colIdx === 0 || colIdx === 6
+                                                                ? '#fc3c3cff' // 일/토 빨간색
+                                                                : 'black',
+                                                        fontSize: 14,
+                                                    }}
+                                                >
+                                                    {date.getDate()}
+                                                </Text>
+                                            </View>
+
                                             {daySchedules.slice(0, 3).map((s, idx) => (
                                                 <View
                                                     key={idx}
@@ -98,9 +149,9 @@ const MonthCalendarView = React.memo(({
                                                     ]}
                                                 >
                                                     <Text style={[
-                                                            styles.scheduleTitleText,
-                                                            {color : scheduleColors[s.color].font}
-                                                        ]}>{s.name}</Text>
+                                                        styles.scheduleTitleText,
+                                                        { color: scheduleColors[s.color].font }
+                                                    ]}>{s.name}</Text>
                                                 </View>
                                             ))}
                                             {daySchedules.length > 3 && (
@@ -214,8 +265,15 @@ export default function PersonalMonth() {
                 currentMonthNumRows={numRows}
                 styles={styles}
                 onDatePress={handleDatePress}
+                onTodayPress={handleGoToToday}
             />
         );
+    };
+
+    const handleGoToToday = () => {
+        const today = new Date();
+        setBaseDate(today); // 중앙 페이지를 오늘 기준으로 재설정
+        pagerRef.current?.setPageWithoutAnimation(1); // 중앙 페이지로 강제 이동
     };
 
     return (
@@ -248,6 +306,7 @@ export default function PersonalMonth() {
                         currentMonthNumRows={Math.ceil(getMonthDays(coverDate).length / 7)}
                         styles={styles}
                         onDatePress={handleDatePress}
+                        onTodayPress={handleGoToToday}
                     />
                 </View>
             )}
@@ -291,7 +350,11 @@ const styles = StyleSheet.create({
     },
     todayBtn: {
         fontSize: 14,
-        color: '#666',
+        color: '#007AFF', // ✅ 파란색으로
+        fontWeight: '500',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 5,
     },
     weekRow: {
         flexDirection: 'row',
@@ -313,7 +376,7 @@ const styles = StyleSheet.create({
         borderTopColor: '#ddd',
     },
     dateCell: {
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'flex-start',
         padding: 4,
         flexGrow: 1,

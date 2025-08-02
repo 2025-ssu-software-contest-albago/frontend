@@ -12,9 +12,9 @@ interface WeeklyGridProps {
   CELL_WIDTH: number;
   selectedCells: Record<number, number[]>;
   onCellToggle: (col: number, row: number) => void;
+  CELL_HEIGHT : number;
 }
 
-const ROW_HEIGHT = 30;
 const NUM_COLS = 7;
 
 const WeeklyGrid: React.FC<WeeklyGridProps> = ({
@@ -22,6 +22,7 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
   CELL_WIDTH,
   selectedCells,
   onCellToggle,
+  CELL_HEIGHT,
 }) => {
   const lastColRow = useSharedValue<{ col: number; row: number } | null>(null);
 
@@ -31,7 +32,7 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
     .onStart(e => {
       'worklet';
       const col = Math.floor(e.x / CELL_WIDTH);
-      const row = Math.floor(e.y / ROW_HEIGHT);
+      const row = Math.floor(e.y / CELL_HEIGHT);
       if (col < 0 || col >= NUM_COLS || row < 0 || row >= hours.length) return;
       lastColRow.value = { col, row };
       runOnJS(onCellToggle)(col, row);
@@ -39,7 +40,7 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
     .onUpdate(e => {
       'worklet';
       const col = Math.floor(e.x / CELL_WIDTH);
-      const row = Math.floor(e.y / ROW_HEIGHT);
+      const row = Math.floor(e.y / CELL_HEIGHT);
       if (col < 0 || col >= NUM_COLS || row < 0 || row >= hours.length) return;
       const last = lastColRow.value;
       if (last && last.col === col && last.row === row) return;
@@ -63,7 +64,7 @@ const WeeklyGrid: React.FC<WeeklyGridProps> = ({
                   styles.cell,
                   {
                     width: CELL_WIDTH,
-                    height: ROW_HEIGHT,
+                    height: CELL_HEIGHT,
                     borderRightWidth: colIdx === NUM_COLS - 1 ? 0 : 0.2,
                     backgroundColor:
                       selectedCells[colIdx]?.includes(rowIdx) ? '#99ccff' : 'transparent',
