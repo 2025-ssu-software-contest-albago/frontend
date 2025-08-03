@@ -19,8 +19,9 @@ export default function TeamScheduleDetail() {
   // memberId는 route.params로 전달됨
   const { memberId } = route.params || {};
   const user = useUserStore((state) => state.user);
+  const selectedSpaceId = useUserStore((state)=>state.selected_space)
   // 팀 멤버 찾기
-  const teamSpace = user?.spaces?.find((s) => s.type === 'team');
+  const teamSpace = user?.spaces[selectedSpaceId];
   const member = teamSpace?.members?.find((m) => m.id === memberId);
 
   if (!member) {

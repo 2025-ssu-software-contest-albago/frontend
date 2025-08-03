@@ -13,6 +13,7 @@ import { scheduleColors } from '../../scripts/color/scheduleColor'
 export default function TeamUserDetailEdit() {
     const { memberId } = useLocalSearchParams();
     const { user, setUser } = useUserStore();
+    const selectedSpaceId = useUserStore((state)=>state.selected_space)
 
     const [member, setMember] = useState(null);
 
@@ -35,7 +36,7 @@ export default function TeamUserDetailEdit() {
 
     useEffect(() => {
         if (!user) return;
-        const teamSpace = user.spaces.find((s) => s.type === 'team');
+        const teamSpace = user?.spaces[selectedSpaceId];
         const foundMember = teamSpace?.members.find((m) => m.id === memberId);
         if (foundMember) {
             setMember(foundMember);
@@ -59,7 +60,7 @@ export default function TeamUserDetailEdit() {
 
     const handleSave = () => {
         if (!user) return;
-        const teamSpace = user.spaces.find((s) => s.type === 'team');
+        const teamSpace = user.spaces[selectedSpaceId];
         const updatedMembers = teamSpace.members.map((m) =>
             m.id === memberId
                 ? {
@@ -77,8 +78,8 @@ export default function TeamUserDetailEdit() {
                 }
                 : m
         );
-        const updatedSpaces = user.spaces.map((s) =>
-            s.type === 'team' ? { ...s, members: updatedMembers } : s
+        const updatedSpaces = user.spaces.map((s,i) =>
+            i === selectedSpaceId ? { ...s, members: updatedMembers } : s
         );
         setUser({ ...user, spaces: updatedSpaces });
         if (Platform.OS === 'android') {
@@ -138,7 +139,7 @@ export default function TeamUserDetailEdit() {
                     <View style={styles.row}>
                         <Text style={styles.label}>색상</Text>
                         <TouchableOpacity onPress={() => setColorModalVisible(true)} style={styles.colorBox}>
-                            <View style={[styles.colorDot, { backgroundColor: scheduleColors[color].main }]} />
+                            <View style={[styles.colorDot, { backgroundColor: scheduleColors[color]?.main }]} />
                             <Feather name="chevron-down" size={18} color="#555" />
                         </TouchableOpacity>
                     </View>
@@ -197,7 +198,7 @@ export default function TeamUserDetailEdit() {
                 visible={colorModalVisible}
                 onClose={() => setColorModalVisible(false)}
                 onSelect={(colorName) => {
-                    setColor(scheduleColors[colorName].main);
+                    setColor(colorName);
                 }}
             />
         </View>

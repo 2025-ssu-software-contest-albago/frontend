@@ -6,8 +6,8 @@ export default function Index() {
   // useEffect(()=>{
   //   getKeyHashAndroid().then(console.log);
   // })
-  // return <Redirect href="/personal" />;
-  return <Redirect href="/login" />;
+  return <Redirect href="/personal" />;
+  // return <Redirect href="/login" />;
 }
 
 

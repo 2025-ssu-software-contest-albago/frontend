@@ -193,7 +193,9 @@ export default function PersonalMonth() {
     const setEditDate = useEditDateStore((state) => state.setEditDate);
 
     useEffect(() => {
-        setUser(userData);
+        if (!user || user.spaces.length === 0) {
+            setUser(userData); // ✅ 진짜 초기 진입일 때만 세팅
+        }
     }, []);
 
     const getMonthDays = (date) => {

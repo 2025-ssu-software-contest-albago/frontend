@@ -60,6 +60,7 @@ export default function RootLayout() {
             <Stack.Screen name="+not-found" />
             <Stack.Screen name="addWorkPlace" options={{ headerShown: false }} />
             <Stack.Screen name="addTeamSpace" options={{ headerShown: false }} />
+            <Stack.Screen name="addTeamSpaceMap" options={{ headerShown: false }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />

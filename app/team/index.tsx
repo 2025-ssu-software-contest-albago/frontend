@@ -32,6 +32,10 @@ export default function CalendarPager() {
   const selectedSpaceId = useUserStore((state) => state.selected_space);
   const router = useRouter();
 
+  const currentSpace = user?.spaces[selectedSpaceId];
+  const currentMember = currentSpace?.members?.find(member => member.id === user.id);
+  const currentUserRole = currentMember?.role; // 예: "admin", "member" 등
+
   return (
     <View
       style={[{ flex: 1 },
@@ -106,7 +110,15 @@ export default function CalendarPager() {
                 }}>
                   <View style={styles.menuItem}><Feather name="edit-2" size={24} color="#333" /><Text style={styles.menuText}>개인 메모</Text></View>
                 </TouchableOpacity>
-                <View style={styles.menuItem}><Feather name="message-square" size={24} color="#333" /><Text style={styles.menuText}>자유게시판</Text></View>
+                {currentUserRole === 'admin' && (
+                  <TouchableOpacity onPress={() => {
+                    router.push(`/detail/teamInfo`);
+                    setMenuModalVisible(false);
+                  }} style={styles.menuItem}>
+                    <Feather name="settings" size={24} color="#333" />
+                    <Text style={styles.menuText}>팀 정보 및 설정</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </Modal>
             {/* 팀원 정보 모달 */}
@@ -120,18 +132,20 @@ export default function CalendarPager() {
             >
               <View style={styles.teamInfoModalContent}>
                 <Text style={styles.teamInfoHeader}>팀원 정보</Text>
-                {user?.spaces?.find((s: any) => s.type === 'team')?.members?.map((member: any, idx: number) => (
+                {user?.spaces[selectedSpaceId]?.members?.map((member: any, idx: number) => (
                   <View key={member.id} style={styles.teamMemberRow}>
                     <View style={[styles.colorBar, { backgroundColor: scheduleColors[member.color].main || '#ccc' }]} />
                     <Text style={styles.memberName}>{member.name}</Text>
                     {member.role === "admin" && <Text style={styles.managerLabel}>관리자</Text>}
                     <View style={styles.memberIcons}>
-                      <TouchableOpacity onPress={() => {
-                        setTeamInfoModalVisible(false);
-                        router.push(`/detail/teamUserDetail?memberId=${member.id}`);
-                      }}>
-                        <Feather name="user" size={22} color="#222" />
-                      </TouchableOpacity>
+                      {currentUserRole === 'admin' && (
+                        <TouchableOpacity onPress={() => {
+                          setTeamInfoModalVisible(false);
+                          router.push(`/detail/teamUserDetail?memberId=${member.id}`);
+                        }}>
+                          <Feather name="user" size={22} color="#222" />
+                        </TouchableOpacity>
+                      )}
                       <Feather name="repeat" size={22} color="#222" style={{ marginLeft: 18 }} />
                       <TouchableOpacity onPress={() => {
                         router.push(`/detail/teamUserScheduleList?memberId=${member.id}`);

@@ -114,9 +114,14 @@ export const userData = {
     {
       "id": "teamSpace_id1",
       "type": "team",
-      "name": "팀 공간",
+      "name": "네네치킨 강남 1호점",
       "imageUrl": null,
       "lastUpdatedAt": "2025-07-01T09:02:11Z",
+      location: {
+        name: '사용자 지정 위치',
+        lat: 37.557224,
+        lng: 127.174631
+      },
       "members": [
         {
           "id": "user_id1",

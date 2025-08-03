@@ -40,6 +40,12 @@ export default function DetailStackLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="teamInfo"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
