@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { Appearance } from 'react-native'; // 기기 시스템 설정 읽기 (초기값 설정용)
-import AsyncStorage from '@react-native-async-storage/async-storage'; // 테마 설정을 저장하기 위해 설치 필요
+// import AsyncStorage from '@react-native-async-storage/async-storage'; // 테마 설정을 저장하기 위해 설치 필요
 
 // 1. AsyncStorage 설치 (아직 설치 안 되어 있다면)
 // npx expo install @react-native-async-storage/async-storage
