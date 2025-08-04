@@ -24,14 +24,12 @@ export default function PersonalSalary() {
     );
   }
 
-  // 현재 달 스케줄 필터
   const monthSchedules = useMemo(() => {
     return selectedSpace.schedules.filter(schedule =>
       dayjs(schedule.startTime).isSame(currentMonth, 'month')
     );
   }, [selectedSpace, currentMonth]);
 
-  // 근무지별 데이터로 그룹핑
   const workPlaceStats = useMemo(() => {
     const stats = {};
     monthSchedules.forEach(sch => {
@@ -45,47 +43,69 @@ export default function PersonalSalary() {
     return stats;
   }, [monthSchedules]);
 
-  // 총액 & 총시간
   const totalAmount = Object.values(workPlaceStats).reduce((acc, w) => acc + w.totalAmount, 0);
   const totalHours = Object.values(workPlaceStats).reduce((acc, w) => acc + w.totalHours, 0);
 
-  // 현재 달 기간
   const period = `${currentMonth.startOf('month').format('M.D')} - ${currentMonth.endOf('month').format('M.D')}`;
 
   return (
     <ScrollView style={[styles.container, { paddingTop: insets.top + 30 }]}>
-      <TouchableOpacity onPress={() => router.push('/detail/personalTotalSalary')}>
-        <View style={styles.totalCard}>
-          <Text style={styles.monthTitle}>{currentMonth.format('M')}월 총 금액</Text>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>총액</Text>
-            <Text style={styles.totalValue}>{Math.round(totalAmount).toLocaleString()}원</Text>
-          </View>
+      <View style={{ flex: 1, alignItems: 'center', marginBottom: 15 }}>
+        <Text style={{ fontSize: 16, color: "#747474ff" }}>월별 급여 상세</Text>
+      </View>
+      <View style={styles.monthHeader}>
+        <TouchableOpacity onPress={() => setCurrentMonth(currentMonth.subtract(1, 'month'))}>
+          <Ionicons name="chevron-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.monthHeaderText}>{currentMonth.format('YYYY년 M월')}</Text>
+        <TouchableOpacity onPress={() => setCurrentMonth(currentMonth.add(1, 'month'))}>
+          <Ionicons name="chevron-forward" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.totalCard}>
+        <Text style={styles.totalSubText}>근무 시간 : {Math.round(totalHours)}시간</Text>
+        <Text style={styles.totalMainText}>{Math.round(totalAmount).toLocaleString()}원</Text>
+        <View style={styles.totalButtonRow}>
+          <TouchableOpacity style={styles.button}><Ionicons name="download-outline" size={16} color="#333" /><Text style={styles.buttonText}>  다운로드</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.button}><Ionicons name="share-social-outline" size={16} color="#333" /><Text style={styles.buttonText}>  공유하기</Text></TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </View>
+
+      <Text style={styles.workTitle}>근무지별 급여 상세</Text>
 
       <View style={styles.workCard}>
-        <Text style={styles.workTitle}>근무지 관리</Text>
         {selectedSpace?.workPlaces?.map(wp => {
           const stats = workPlaceStats[wp.id] ?? { totalAmount: 0, totalHours: 0 };
           return (
-            <View key={wp.id} style={styles.workRow}>
+            <TouchableOpacity
+              key={wp.id}
+              style={styles.salaryCard}
+              onPress={() =>
+                router.push({
+                  pathname: '/detail/workplaceSalaryDetail',
+                  params: {
+                    id: wp.id,
+                    year: currentMonth.year(),
+                    month: currentMonth.month() + 1  // dayjs는 0-indexed month라서 +1
+                  },
+                })
+              }
+            >
               <View style={[styles.colorBar, { backgroundColor: scheduleColors[wp.color].main }]} />
-              <View style={{ flex: 1 }}>
+              <View style={styles.cardTextContainer}>
                 <Text style={styles.workName}>{wp.name}</Text>
                 <Text style={styles.period}>{period}</Text>
               </View>
-              <View style={{ alignItems: 'flex-end' }}>
+              <View style={styles.rightInfo}>
                 <Text style={styles.amount}>{Math.round(stats.totalAmount).toLocaleString()}원</Text>
-                <Text style={styles.hours}>{Math.round(stats.totalHours)}시간</Text>
+                <Ionicons name="chevron-forward" size={16} color="#999" />
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })}
 
-        <TouchableOpacity style={styles.addRow} onPress={()=>{
-          router.push("/addWorkPlace")
-        }}>
+        <TouchableOpacity style={styles.addRow} onPress={() => router.push("/addWorkPlace")}>
           <Text style={styles.addText}>+ 근무지 추가하기</Text>
         </TouchableOpacity>
       </View>
@@ -95,42 +115,44 @@ export default function PersonalSalary() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16 },
+  monthHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16
+  },
+  monthHeaderText: {
+    fontSize: 18, fontWeight: '700', color: '#222'
+  },
   totalCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
-    alignItems: 'center'
+    backgroundColor: '#ecececff', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 20, marginBottom: 20, alignItems: 'center'
   },
-  monthTitle: {
-    fontSize: 16, color: '#888', marginBottom: 50
+  totalSubText: {
+    fontSize: 14, color: '#666', marginBottom: 8
   },
-  totalRow: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: "100%",
+  totalMainText: {
+    fontSize: 24, fontWeight: 'bold', color: '#111', marginBottom: 16
   },
-  totalLabel: {
-    fontSize: 16, fontWeight: '600', color: '#333'
+  totalButtonRow: {
+    flexDirection: 'row', gap: 10
   },
-  totalValue: {
-    fontSize: 20, color: '#0057ff'
+  button: {
+    backgroundColor: '#d3d3d3ff', justifyContent: "center", alignContent: "center", width: "45%", paddingVertical: 15, paddingHorizontal: 14, borderRadius: 8, flexDirection: 'row', alignItems: 'center'
+  },
+  buttonText: {
+    fontSize: 13, color: '#333'
   },
   workCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, elevation: 2
+    backgroundColor: '#ecececff', borderRadius: 8, paddingVertical: 20, paddingHorizontal: 10,
   },
   workTitle: {
-    fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 16
+    fontSize: 16, color: '#575757ff', marginTop: 10, marginBottom: 16, marginLeft: 10,
   },
-  workRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16
+  salaryCard: {
+    flexDirection: 'row', alignItems: 'center', marginBottom: 16, backgroundColor: '#f9f9f9', borderRadius: 8, padding: 12
   },
   colorBar: {
     width: 4, height: 40, borderRadius: 2, marginRight: 12
+  },
+  cardTextContainer: {
+    flex: 1
   },
   workName: {
     fontSize: 15, fontWeight: '600', color: '#333'
@@ -138,11 +160,11 @@ const styles = StyleSheet.create({
   period: {
     fontSize: 12, color: '#999'
   },
-  amount: {
-    fontSize: 15, fontWeight: '600', color: '#333'
+  rightInfo: {
+    flexDirection: 'row', alignItems: 'center', gap: 4
   },
-  hours: {
-    fontSize: 12, color: '#777'
+  amount: {
+    fontSize: 14, fontWeight: '600', color: '#222'
   },
   addRow: {
     flexDirection: 'row', alignItems: 'center'

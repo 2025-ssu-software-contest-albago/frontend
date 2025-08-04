@@ -6,6 +6,7 @@ import { scheduleColors } from '@/scripts/color/scheduleColor';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert } from 'react-native';
 
 
 const screenWidth = Dimensions.get('window').width;
@@ -84,7 +85,7 @@ export default function TeamSpaceInfoScreen() {
 `;
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={[styles.container, { paddingTop: insets.top, backgroundColor: "white" }]}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Feather name="chevron-left" size={28} color="#333" />
@@ -126,6 +127,29 @@ export default function TeamSpaceInfoScreen() {
                     }}
                 />
             </View>
+            <TouchableOpacity
+                style={[styles.deleteButton, {marginBottom: insets.bottom + 10}]}
+                onPress={() => {
+                    Alert.alert(
+                        '정말 삭제하시겠어요?',
+                        '이 팀 공간의 모든 정보가 사라집니다.',
+                        [
+                            { text: '취소', style: 'cancel' },
+                            {
+                                text: '삭제',
+                                style: 'destructive',
+                                onPress: () => {
+                                    // 실제 삭제 처리
+                                    // useUserStore.getState().removeSpace(selected_space); selected_space 바꿔줘야 할거임 아마 나중에 고치기
+                                    // router.replace('/'); // 홈 혹은 팀 목록 화면으로 이동
+                                },
+                            },
+                        ]
+                    );
+                }}
+            >
+                <Text style={styles.deleteButtonText}>팀 공간 삭제하기</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -133,7 +157,7 @@ export default function TeamSpaceInfoScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 10 },
     title: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
-    subtitle: { fontSize: 18, fontWeight: '600', marginTop: 24, marginBottom: 8 },
+    subtitle: { fontSize: 18, fontWeight: '600', marginTop: 24, marginBottom: 8, color: "#7b7b7bff" },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -156,15 +180,6 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         backgroundColor: '#eee',
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 12,
-    },
-    backButton: {
-        paddingHorizontal: 0,
-        paddingVertical: 6,
-    },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -173,10 +188,9 @@ const styles = StyleSheet.create({
     memberRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 14,
-        paddingVertical: 6,
+        paddingVertical: 14,
         borderBottomWidth: 0.5,
-        borderColor: '#eee',
+        borderColor: '#d1d1d1ff',
     },
     colorDot: {
         width: 10,
@@ -199,5 +213,17 @@ const styles = StyleSheet.create({
         color: '#007AFF',
         fontWeight: '500',
         marginTop: 2,
+    },
+    deleteButton: {
+        marginTop: 32,
+        backgroundColor: '#ff5950ff',
+        paddingVertical: 14,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    deleteButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold'
     },
 });
