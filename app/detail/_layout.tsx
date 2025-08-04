@@ -40,6 +40,24 @@ export default function DetailStackLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="teamInfo"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="workplaceSalaryDetail"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="memberSalaryDetail"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

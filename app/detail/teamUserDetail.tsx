@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { scheduleColors } from '@/scripts/color/scheduleColor';
 
 import { useRouter } from 'expo-router';
 
@@ -18,8 +19,9 @@ export default function TeamScheduleDetail() {
   // memberId는 route.params로 전달됨
   const { memberId } = route.params || {};
   const user = useUserStore((state) => state.user);
+  const selectedSpaceId = useUserStore((state)=>state.selected_space)
   // 팀 멤버 찾기
-  const teamSpace = user?.spaces?.find((s) => s.type === 'team');
+  const teamSpace = user?.spaces[selectedSpaceId];
   const member = teamSpace?.members?.find((m) => m.id === memberId);
 
   if (!member) {
@@ -51,9 +53,15 @@ export default function TeamScheduleDetail() {
       <View style={styles.card}>
         <View style={styles.infoRow}>
           <Text style={styles.label}>색상</Text>
-          <View style={[styles.colorDot, { backgroundColor: member.color || '#ccc' }]} />
+          <View style={[styles.colorDot, { backgroundColor: scheduleColors[member.color].main || '#ccc' }]} />
         </View>
-        <View style={styles.infoRow}><Text style={styles.label}>직급</Text><Text style={styles.value}>직원</Text></View>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>직급</Text>
+          <Text style={styles.value}>
+            {
+              member.role === "admin" ? "관리자" : "직원"
+            }
+          </Text></View>
         <View style={styles.infoRow}><Text style={styles.label}>시급</Text><Text style={styles.value}>{member.hourlyWage?.toLocaleString()} 원</Text></View>
       </View>
 

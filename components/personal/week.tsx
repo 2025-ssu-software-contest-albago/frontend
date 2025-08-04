@@ -6,11 +6,16 @@ import {
   Dimensions,
   ScrollView,
   InteractionManager,
+  Pressable,
 } from 'react-native';
+import Modal from 'react-native-modal';
+
 import PagerView from 'react-native-pager-view';
 import { addWeeks, startOfWeek, format, addDays, parseISO } from 'date-fns';
 import { useUserStore } from '@/scripts/store/userStore';
 import { scheduleColors } from '@/scripts/color/scheduleColor';
+import DailyScheduleModalContent from './DailyScheduleModal';
+
 
 const { height } = Dimensions.get('window');
 const WEEK_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -22,16 +27,27 @@ export default function PersonalWeek() {
   const user = useUserStore((state) => state.user);
   const selected_space = useUserStore((state) => state.selected_space);
 
-  // 더블버퍼링 overlay
+  // 모달 상태
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
   const [showCover, setShowCover] = useState(false);
   const [coverDate, setCoverDate] = useState(null);
 
-  const getCurrentWeek = (date) => {
+  const getCurrentWeek = (date: Date) => {
     const start = startOfWeek(date, { weekStartsOn: 0 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   };
 
-  const getTimeBounds = (weekDates) => {
+  const getSchedulesForDate = (date: Date | null) => {
+    if (!date) return [];
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return user?.spaces?.[selected_space]?.schedules?.filter((s) =>
+      format(parseISO(s.startTime), 'yyyy-MM-dd') === dateStr
+    ) || [];
+  };
+
+  const getTimeBounds = (weekDates: Date[]) => {
     const schedules = user?.spaces?.[selected_space]?.schedules || [];
     let startHour = 9;
     let endHour = 18;
@@ -56,7 +72,7 @@ export default function PersonalWeek() {
     return [startHour, endHour, hourBlockHeight, totalHours, totalHeight];
   };
 
-  const renderWeek = (targetDate) => {
+  const renderWeek = (targetDate: Date) => {
     const weekDates = getCurrentWeek(targetDate);
     const [startHour, endHour, hourBlockHeight, , totalHeight] = getTimeBounds(weekDates);
     const schedules = user?.spaces?.[selected_space]?.schedules || [];
@@ -67,7 +83,7 @@ export default function PersonalWeek() {
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(s);
       return acc;
-    }, {});
+    }, {} as Record<string, any[]>);
 
     const timeSlots = [];
     for (let t = startHour; t <= endHour; t += 0.5) {
@@ -104,8 +120,16 @@ export default function PersonalWeek() {
             {weekDates.map((date, idx) => {
               const dateKey = format(date, 'yyyy-MM-dd');
               const daySchedules = scheduleMap[dateKey] || [];
+
               return (
-                <View key={idx} style={styles.dayColumn}>
+                <Pressable
+                  key={idx}
+                  style={styles.dayColumn}
+                  onPress={() => {
+                    setSelectedDate(date);
+                    setShowModal(true);
+                  }}
+                >
                   {daySchedules.map((s, i) => {
                     const start = parseISO(s.startTime);
                     const end = parseISO(s.endTime);
@@ -119,17 +143,21 @@ export default function PersonalWeek() {
                         key={i}
                         style={[
                           styles.scheduleBlock,
-                          { top, height, backgroundColor: scheduleColors[s.color].background || '#ccc' },
+                          {
+                            top,
+                            height,
+                            backgroundColor: scheduleColors[s.color]?.background || '#ccc',
+                          },
                         ]}
                       >
                         <Text style={[
-                            styles.scheduleText,
-                            { color: scheduleColors[s.color].font }
-                          ]}>{s.name}</Text>
+                          styles.scheduleText,
+                          { color: scheduleColors[s.color]?.font || '#fff' }
+                        ]}>{s.name}</Text>
                       </View>
                     );
                   })}
-                </View>
+                </Pressable>
               );
             })}
           </View>
@@ -138,7 +166,7 @@ export default function PersonalWeek() {
     );
   };
 
-  const renderWeekPage = (offset) => {
+  const renderWeekPage = (offset: number) => {
     const targetDate = addWeeks(baseDate, offset);
     return (
       <View key={offset} style={{ flex: 1 }}>
@@ -147,14 +175,13 @@ export default function PersonalWeek() {
     );
   };
 
-  const handlePageSelected = (e) => {
+  const handlePageSelected = (e: any) => {
     const newPage = e.nativeEvent.position;
     const offset = newPage - 1;
 
     if (offset !== 0) {
       setScrollEnabled(false);
       const newBase = addWeeks(baseDate, offset);
-
       setCoverDate(newBase);
       setShowCover(true);
 
@@ -189,6 +216,23 @@ export default function PersonalWeek() {
           {renderWeek(coverDate)}
         </View>
       )}
+      <Modal
+        isVisible={showModal}
+        onBackdropPress={() => setShowModal(false)} // ✅ 배경 클릭 시 닫힘
+        onBackButtonPress={() => setShowModal(false)} // ✅ 안드로이드 백버튼 시 닫힘
+        style={{ justifyContent: 'flex-end', margin: 0 }} // ✅ 하단 정렬
+        backdropOpacity={0.5} // ✅ 배경 어둡게
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        useNativeDriver
+      >
+        <DailyScheduleModalContent
+          selectedDate={selectedDate}
+          dailySchedules={getSchedulesForDate(selectedDate)}
+          onAddSchedule={() => setShowModal(false)}
+          onClose={() => setShowModal(false)}
+        />
+      </Modal>
     </View>
   );
 }
@@ -245,7 +289,6 @@ const styles = StyleSheet.create({
   },
   scheduleText: {
     fontSize: 10,
-    color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
   },

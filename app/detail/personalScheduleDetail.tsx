@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserStore } from '@/scripts/store/userStore';
 import { scheduleColors } from '@/scripts/color/scheduleColor';
+import Modal from 'react-native-modal';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -30,6 +31,7 @@ const PersonalScheduleDetail: React.FC = () => {
     const user = useUserStore((state) => state.user);
     const selected_space = useUserStore((state) => state.selected_space);
     const space_type = user?.spaces[selected_space]?.type;
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         if (searchParams.schedule) {
@@ -70,8 +72,8 @@ const PersonalScheduleDetail: React.FC = () => {
     const durationHours = (durationMs / (1000 * 60 * 60)); // 시간 단위
 
     const displayDuration = Number.isInteger(durationHours)
-    ? durationHours.toString() // 정수면 소수점 없이 문자열로
-    : durationHours.toFixed(1); // 소수점이 있으면 소수점 한 자리까지
+        ? durationHours.toString() // 정수면 소수점 없이 문자열로
+        : durationHours.toFixed(1); // 소수점이 있으면 소수점 한 자리까지
 
     // hourlyWage가 있을 때만 totalPrice 계산
     const totalPrice = (schedule.hourlyWage && durationHours > 0)
@@ -95,12 +97,16 @@ const PersonalScheduleDetail: React.FC = () => {
 
             <View style={styles.timeSection}>
                 <Text style={styles.timeRange}>{formattedTimeRange}</Text>
-                <Text style={styles.durationText}>{displayDuration}시간</Text> 
+                <Text style={styles.durationText}>{displayDuration}시간</Text>
             </View>
 
-            <Pressable style={[styles.requestShiftButton, space_type === 'personal' ? { backgroundColor: '#ccc' } : { backgroundColor: '#FFEE58',}]} 
-                disabled={space_type === 'personal'} 
-                onPress={() => console.log('근무 교대 요청')}
+            <Pressable
+                style={[
+                    styles.requestShiftButton,
+                    space_type === 'personal' ? { backgroundColor: '#ccc' } : { backgroundColor: '#FFEE58' },
+                ]}
+                disabled={space_type === 'personal'}
+                onPress={() => setModalVisible(true)}
             >
                 <Text style={styles.requestShiftButtonText}>근무 교대 요청하기</Text>
             </Pressable>
@@ -129,6 +135,49 @@ const PersonalScheduleDetail: React.FC = () => {
                     {schedule.memo && schedule.memo.trim() !== '' ? schedule.memo : '추가한 메모가 없습니다.'}
                 </Text>
             </View>
+
+            {/* 하단 삭제 버튼 */}
+            <Pressable
+                style={[styles.deleteButton, { marginBottom: insets.bottom + 20 }]}
+                onPress={() => {
+                    // 여기에 삭제 처리 로직 추가
+                    console.log('삭제하기 눌림');
+                    // 예: Alert.alert('정말 삭제하시겠습니까?', ...)
+                }}
+            >
+                <Text style={styles.deleteButtonText}>삭제하기</Text>
+            </Pressable>
+
+            <Modal
+                isVisible={modalVisible}
+                onBackdropPress={() => setModalVisible(false)}
+                onBackButtonPress={() => setModalVisible(false)}
+                useNativeDriver
+                hideModalContentWhileAnimating
+                style={styles.bottomModal}
+            >
+                <View style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>교대 요청할 사람 선택</Text>
+                    <ScrollView>
+                        {(user.spaces[selected_space]?.members || [])
+                            .filter(member => member.id !== user.id)
+                            .map(member => (
+                                <View key={member.id} style={styles.memberRow}>
+                                    <Text style={styles.memberName}>{member.name || '이름 없음'}</Text>
+                                    <Pressable
+                                        style={styles.swapButton}
+                                        onPress={() => {
+                                            setModalVisible(false);
+                                            console.log(`교대 요청: ${member.id}`);
+                                        }}
+                                    >
+                                        <Text style={styles.swapButtonText}>교대 요청</Text>
+                                    </Pressable>
+                                </View>
+                            ))}
+                    </ScrollView>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -273,7 +322,58 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginTop: 100,
         paddingHorizontal: 20,
-    }
+    },
+    deleteButton: {
+        backgroundColor: 'rgba(255, 108, 95, 1)',
+        paddingVertical: 14,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 20,
+    },
+    deleteButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    bottomModal: {
+        justifyContent: 'flex-end',
+        margin: 0,
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        padding: 20,
+        maxHeight: '60%',
+    },
+    modalTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 12,
+    },
+    memberRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    memberName: {
+        fontSize: 16,
+        color: '#333',
+    },
+    swapButton: {
+        backgroundColor: '#007AFF',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 6,
+    },
+    swapButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
 });
 
 export default PersonalScheduleDetail;
