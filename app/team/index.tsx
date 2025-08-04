@@ -311,4 +311,28 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     alignItems: 'center',
   },
+  // CommunityHeader 관련 스타일 추가
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 50, // 상태바 높이 고려
+    paddingBottom: 18,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    zIndex: 10,
+  },
+  backButton: {
+    marginRight: 10,
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#222',
+    flex: 1,
+    textAlign: 'center',
+    color: '#222',
+  },
 });

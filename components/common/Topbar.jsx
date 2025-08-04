@@ -58,6 +58,7 @@ export default function TopBar() {
                 <Pressable onPress={() => router.push('/appSettings')}>
                     <Feather name="sliders" size={20} color="#333" />
                 </Pressable>
+
             </View>
 
             {/* 모달 */}
