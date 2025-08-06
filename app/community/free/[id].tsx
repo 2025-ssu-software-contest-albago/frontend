@@ -2,7 +2,6 @@ import { AntDesign } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import CommunityHeader from '../../components/CommunityHeader';
 import { usePostContext } from '../contexts/PostContext';
 
 export default function FreePostDetailScreen() {
@@ -13,7 +12,6 @@ export default function FreePostDetailScreen() {
   // 사용자의 좋아요 상태를 추적하기 위한 상태 추가
   const [postLiked, setPostLiked] = useState(false);
   const [commentLikes, setCommentLikes] = useState<Record<string, boolean>>({});
-  
   // 게시글 정보 가져오기
   const post = getPostById(id as string) || {
     id: id as string,
@@ -27,7 +25,7 @@ export default function FreePostDetailScreen() {
   // 댓글 목록 가져오기
   const comments = getCommentsByPostId(id as string);
 
-  // 좋아요 처리 함수 - 토글 방식으로 변경
+  // 좋아요 처리 함수
   const handleLike = () => {
     // 좋아요 상태 토글
     const newLikedState = !postLiked;
@@ -37,7 +35,7 @@ export default function FreePostDetailScreen() {
     togglePostLike(id as string, newLikedState);
   };
 
-  // 댓글 좋아요 처리 함수 - 토글 방식으로 변경
+  // 댓글 좋아요 처리 함수
   const handleCommentLike = (commentId: string) => {
     // 현재 댓글의 좋아요 상태
     const currentLiked = commentLikes[commentId] || false;
@@ -66,8 +64,7 @@ export default function FreePostDetailScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
-      <CommunityHeader />
+    <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* 뒤로가기 버튼 */}
         <View style={styles.header}>
@@ -83,11 +80,11 @@ export default function FreePostDetailScreen() {
         {/* 게시글 내용 */}
         <View style={styles.card}>
           <Text style={styles.title}>{post.title}</Text>
-          <Text style={styles.date}>{post.date ? formatDate(post.date) : '날짜 없음'}</Text>
+           <Text style={styles.date}>{post.date ? formatDate(post.date) : '날짜 없음'}</Text>
           <View style={styles.divider} />
           <Text style={styles.content}>{post.content}</Text>
           
-          {/* 좋아요 & 댓글 카운트 - 좋아요 색상 조건부 변경 */}
+          {/* 좋아요 & 댓글 카운트 */}
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.iconRow} onPress={handleLike}>
               <AntDesign 
@@ -144,6 +141,7 @@ export default function FreePostDetailScreen() {
                 <Text style={styles.commentAuthor}>{comment.author}</Text>
                 <Text style={styles.commentDate}>
                   {formatDate(comment.createdAt)}
+
                 </Text>
               </View>
               <Text style={styles.commentContent}>{comment.content}</Text>
@@ -191,12 +189,14 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 5,
   },
+
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
     marginLeft: 10,
   },
+
   card: {
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -244,11 +244,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
   },
+  
+  // 게시글 수정 버튼 - 새로 추가
+
   likeCount: {
     marginLeft: 4,
     fontSize: 14,
     color: '#e53935',
   },
+
   editPostButton: {
     alignSelf: 'flex-start',
     backgroundColor: '#f0f7ff',
@@ -264,6 +268,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 13,
   },
+  
+  // 댓글 헤더
   commentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -285,6 +291,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1976d2',
   },
+  
+  // 댓글 아이템
   commentItem: {
     marginBottom: 15,
     paddingBottom: 15,
@@ -317,6 +325,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  commentLikeCount: {
+    marginLeft: 4,
+    fontSize: 12,
+    color: '#e53935',
+  },
   commentIconRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -325,11 +338,6 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 12,
     color: '#666',
-  },
-  commentLikeCount: {
-    marginLeft: 4,
-    fontSize: 12,
-    color: '#e53935',
   },
   editCommentText: {
     fontSize: 13,
