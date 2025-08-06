@@ -104,7 +104,7 @@ export default function FreePostDetailScreen() {
         </View>
         
         {/* 게시글 수정 버튼 - 게시글 본문 아래로 이동 */}
-        <TouchableOpacity 
+        {/* <TouchableOpacity ity 
           onPress={() => router.push({
             pathname: '/community/free/edit',
             params: { id: post.id }
@@ -112,7 +112,7 @@ export default function FreePostDetailScreen() {
           style={styles.editPostButton}
         >
           <Text style={styles.editPostButtonText}>게시글 수정</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */} */}
 
         {/* 댓글 섹션 헤더 */}
         <View style={styles.commentHeader}>

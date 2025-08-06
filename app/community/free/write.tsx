@@ -2,11 +2,13 @@ import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { usePostContext } from '../contexts/PostContext'; // PostContext import 추가
 
 export default function WritePostScreen() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const { posts, setPosts } = usePostContext(); // Context에서 posts, setPosts 사용
 
   const handleSubmit = () => {
     // 제목이나 내용이 비어있는지 확인
@@ -15,7 +17,19 @@ export default function WritePostScreen() {
       return;
     }
 
-    // 실제 구현에서는 서버에 등록 요청을 보내야 함
+    // 새 게시글 객체 생성
+    const newPost = {
+      id: (posts.length + 1).toString(),
+      title: title.trim(),
+      content: content.trim(),
+      likes: 0,
+      comments: 0,
+      date: new Date().toISOString().slice(0, 10),
+    };
+
+    // Context에 게시글 추가
+    setPosts([newPost, ...posts]);
+
     Alert.alert('성공', '게시글이 등록되었습니다.', [
       {
         text: '확인',

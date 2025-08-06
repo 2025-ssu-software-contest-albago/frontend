@@ -28,10 +28,16 @@ export default function CommunityLayout() {
       <View style={styles.container}>
         {/* 상단 헤더 */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <AntDesign name="arrowleft" size={28} color="#222" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>커뮤니티</Text>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <AntDesign name="arrowleft" size={28} color="#222" />
+            </TouchableOpacity>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={styles.headerTitle}>커뮤니티</Text>
+            </View>
+            {/* 오른쪽 공간 확보용 View */}
+            <View style={{ width: 38 }} />
+          </View>
         </View>
         {/* 커스텀 탭 헤더 */}
         <View style={styles.tabHeader}>
@@ -63,7 +69,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 50,
+    paddingTop: 80,
     paddingBottom: 18,
     paddingHorizontal: 20,
     backgroundColor: '#fff',

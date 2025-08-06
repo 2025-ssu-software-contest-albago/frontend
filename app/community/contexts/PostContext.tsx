@@ -1,4 +1,3 @@
-import { AntDesign } from '@expo/vector-icons'; // AntDesign 아이콘 추가
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 
 // 댓글 타입 정의
@@ -21,21 +20,164 @@ export interface Post {
   date?: string;
 }
 
-// 초기 게시글 데이터
+// 실제 사람들이 작성할 만한 예시 게시글 데이터
 const initialPosts: Post[] = [
-  { id: '1', title: '첫 번째 자유글', content: '자유롭게 의견을 나눠보세요!', likes: 8, comments: 2 },
-  { id: '2', title: '두 번째 자유글', content: '커뮤니티에 오신 것을 환영합니다.', likes: 12, comments: 5 },
-  { id: '3', title: '세 번째 자유글', content: '좋아요와 댓글을 남겨주세요.', likes: 3, comments: 0 },
-  { id: '4', title: '네 번째 자유글', content: '인기 많은 글은 인기 게시판에도 노출됩니다!', likes: 15, comments: 8 },
-  { id: '5', title: '다섯 번째 자유글', content: '10개 이상의 좋아요를 받으면 인기글이 됩니다.', likes: 11, comments: 3 },
+  {
+    id: '1',
+    title: '오늘 알바 첫 출근했어요!',
+    content: '처음이라 많이 긴장했는데, 사장님도 친절하시고 동료분들도 잘 챙겨주셔서 생각보다 괜찮았어요. 혹시 알바 초보가 꼭 알아야 할 팁 있으면 공유 부탁드려요!',
+    likes: 8,
+    comments: 2,
+    date: '2025-08-01'
+  },
+  {
+    id: '2',
+    title: '시급 인상 요청, 어떻게 말해야 할까요?',
+    content: '일한 지 6개월 정도 됐는데, 시급이 너무 낮아서 고민입니다. 사장님께 인상 요청하려면 어떤 식으로 말하는 게 좋을까요? 경험 있으신 분들 조언 부탁드려요.',
+    likes: 12,
+    comments: 3,
+    date: '2025-08-02'
+  },
+  {
+    id: '3',
+    title: '알바하면서 힘들었던 점 공유해요',
+    content: '저는 손님 응대가 제일 힘들었어요. 특히 바쁜 시간대에는 실수도 많고 스트레스도 많이 받네요. 다들 어떤 점이 제일 힘드셨나요?',
+    likes: 3,
+    comments: 1,
+    date: '2025-08-03'
+  },
+  {
+    id: '4',
+    title: '알바 구할 때 꿀팁!',
+    content: '구인 사이트에서 지원할 때 자기소개를 조금 더 구체적으로 쓰면 연락이 더 잘 오는 것 같아요. 여러분만의 알바 구하기 팁 있으면 알려주세요!',
+    likes: 15,
+    comments: 5,
+    date: '2025-08-04'
+  },
+  {
+    id: '5',
+    title: '알바하면서 좋은 점도 많아요',
+    content: '새로운 사람들을 많이 만나고, 사회 경험도 쌓을 수 있어서 좋아요. 힘든 점도 있지만 얻는 것도 많다고 생각해요. 다들 어떤 점이 가장 좋으셨나요?',
+    likes: 11,
+    comments: 3,
+    date: '2025-08-05'
+  },
 ];
 
 // 초기 댓글 데이터
 const initialComments: Comment[] = [
-  { id: 'c1', postId: '1', content: '좋은 글입니다!', author: '사용자1', createdAt: '2025-07-18T10:30:00Z', likes: 2 },
-  { id: 'c2', postId: '1', content: '유익한 정보 감사합니다.', author: '사용자2', createdAt: '2025-07-18T11:15:00Z', likes: 0 },
-  { id: 'c3', postId: '2', content: '흥미로운 주제네요.', author: '사용자3', createdAt: '2025-07-17T09:45:00Z', likes: 1 },
-  { id: 'c4', postId: '2', content: '자주 방문하겠습니다!', author: '사용자4', createdAt: '2025-07-17T10:10:00Z', likes: 0 },
+  {
+    id: 'c1',
+    postId: '1',
+    content: '저도 첫날 엄청 떨렸어요! 그래도 금방 적응하실 거예요. 화이팅!',
+    author: '알바선배',
+    createdAt: '2025-08-01T10:12:00',
+    likes: 2,
+  },
+  {
+    id: 'c2',
+    postId: '1',
+    content: '알바 초보라면 실수해도 너무 걱정하지 마세요. 다들 처음엔 그래요!',
+    author: '응원맨',
+    createdAt: '2025-08-01T11:05:00',
+    likes: 1,
+  },
+  {
+    id: 'c3',
+    postId: '2',
+    content: '저는 솔직하게 말씀드렸어요. 일 열심히 하고 있다는 점 강조하면 좋아요!',
+    author: '경험자',
+    createdAt: '2025-08-02T09:30:00',
+    likes: 3,
+  },
+  {
+    id: 'c4',
+    postId: '2',
+    content: '타이밍도 중요해요. 바쁠 때 말고 여유 있을 때 조심스럽게!',
+    author: '알바고수',
+    createdAt: '2025-08-02T10:10:00',
+    likes: 2,
+  },
+  {
+    id: 'c5',
+    postId: '2',
+    content: '저는 문자로 요청했더니 더 편하게 얘기할 수 있었어요.',
+    author: '익명',
+    createdAt: '2025-08-02T12:20:00',
+    likes: 1,
+  },
+  {
+    id: 'c6',
+    postId: '3',
+    content: '저도 손님 응대가 제일 힘들었어요. 특히 컴플레인 받을 때...',
+    author: '공감해요',
+    createdAt: '2025-08-03T14:00:00',
+    likes: 0,
+  },
+  {
+    id: 'c7',
+    postId: '4',
+    content: '자기소개에 성실함 강조하면 연락 많이 오더라고요!',
+    author: '꿀팁공유',
+    createdAt: '2025-08-04T08:45:00',
+    likes: 2,
+  },
+  {
+    id: 'c8',
+    postId: '4',
+    content: '경력 있으면 꼭 적으세요. 사장님들이 좋아하십니다.',
+    author: '경력자',
+    createdAt: '2025-08-04T09:10:00',
+    likes: 1,
+  },
+  {
+    id: 'c12',
+    postId: '4',
+    content: '지원할 때 연락처를 정확히 적는 것도 중요해요!',
+    author: '연락왕',
+    createdAt: '2025-08-04T09:30:00',
+    likes: 1,
+  },
+  {
+    id: 'c13',
+    postId: '4',
+    content: '면접 볼 때 밝게 인사하면 인상 좋아져요!',
+    author: '면접달인',
+    createdAt: '2025-08-04T10:00:00',
+    likes: 0,
+  },
+  {
+    id: 'c14',
+    postId: '4',
+    content: '알바 후기 찾아보고 지원하면 실패 확률 줄어요!',
+    author: '정보수집러',
+    createdAt: '2025-08-04T10:30:00',
+    likes: 1,
+  },
+  {
+    id: 'c9',
+    postId: '5',
+    content: '저는 다양한 사람 만나는 게 제일 좋았어요!',
+    author: '사교왕',
+    createdAt: '2025-08-05T15:30:00',
+    likes: 1,
+  },
+  {
+    id: 'c10',
+    postId: '5',
+    content: '사회 경험 쌓으면서 자신감도 많이 생겼어요.',
+    author: '자신감UP',
+    createdAt: '2025-08-05T16:00:00',
+    likes: 2,
+  },
+  {
+    id: 'c11',
+    postId: '5',
+    content: '알바하면서 친구도 많이 사귀었어요!',
+    author: '친구많은알바생',
+    createdAt: '2025-08-05T17:10:00',
+    likes: 0,
+  },
 ];
 
 // Context 인터페이스 정의
