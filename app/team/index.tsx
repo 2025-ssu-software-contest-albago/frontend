@@ -97,7 +97,17 @@ export default function CalendarPager() {
                   <Feather name="users" size={24} color="#333" />
                   <Text style={styles.menuText}>팀원 정보</Text>
                 </Pressable>
-                <View style={styles.menuItem}><Feather name="clock" size={24} color="#333" /><Text style={styles.menuText}>출/퇴근 관리</Text></View>
+                <TouchableOpacity
+                  onPress={() => {
+                    router.push('/attendance');
+                    setMenuModalVisible(false);
+                  }}
+                >
+                  <View style={styles.menuItem}>
+                    <Feather name="clock" size={24} color="#333" />
+                    <Text style={styles.menuText}>출/퇴근 관리</Text>
+                  </View>
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => {
                   router.push(`/handover`);
                   setMenuModalVisible(false);
@@ -333,6 +343,5 @@ const styles = StyleSheet.create({
     color: '#222',
     flex: 1,
     textAlign: 'center',
-    color: '#222',
   },
 });
